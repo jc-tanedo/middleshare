@@ -1,4 +1,9 @@
 <resources>
+    <item name="video_format_status" type="id" />
+    <item name="video_quality" type="id" />
+    <item name="video_download" type="id" />
+    <item name="video_custom" type="id" />
+    <item name="video_formats" type="id" />
     <item name="video_retry" type="id" />
     <item name="about_button" type="id" />
     <item name="credits_list" type="id" />

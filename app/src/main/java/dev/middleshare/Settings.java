@@ -12,6 +12,12 @@ final class Settings {
         Format(String mime, String extension) { this.mime = mime; this.extension = extension; }
     }
     enum Theme { SYSTEM, LIGHT, DARK }
+    static VideoQuality getVideoQuality(Context context) {
+        return VideoQuality.parse(prefs(context).getString("video_quality", VideoQuality.STANDARD.name()));
+    }
+    static void setVideoQuality(Context context, VideoQuality quality) {
+        prefs(context).edit().putString("video_quality", quality.name()).apply();
+    }
     static Theme getTheme(Context context) {
         try { return Theme.valueOf(prefs(context).getString("theme", Theme.SYSTEM.name())); }
         catch (IllegalArgumentException | NullPointerException ignored) { return Theme.SYSTEM; }

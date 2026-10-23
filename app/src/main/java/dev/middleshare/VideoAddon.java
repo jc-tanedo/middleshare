@@ -14,7 +14,11 @@ import android.widget.Toast;
 final class VideoAddon {
     static final String PACKAGE = "dev.middleshare.video";
     static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final int MIN_VERSION = 4;
+    static final int MIN_VERSION = 5;
+    static final String QUALITY = "dev.middleshare.QUALITY";
+    static final String CONFIRMED = "dev.middleshare.CONFIRMED";
+    static final String FORMAT = "dev.middleshare.FORMAT";
+    static final String AUDIO = "dev.middleshare.AUDIO";
 
     static boolean available(Context context) {
         try {
@@ -28,10 +32,11 @@ final class VideoAddon {
         } catch (PackageManager.NameNotFoundException e) { return false; }
     }
 
-    static Intent share(String link) {
+    static Intent share(Context context, String link) {
         return new Intent(Intent.ACTION_SEND).setType("text/plain")
                 .setComponent(new ComponentName(PACKAGE, ShareActivity.class.getName()))
-                .putExtra(Intent.EXTRA_TEXT, link);
+                .putExtra(Intent.EXTRA_TEXT, link)
+                .putExtra(QUALITY, Settings.getVideoQuality(context).name());
     }
 
     static void releases(Activity activity) {

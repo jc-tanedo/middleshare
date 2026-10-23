@@ -73,7 +73,22 @@ public final class MainActivity extends Activity {
         LinearLayout videos = Ui.card(this, page);
         videos.addView(Ui.text(this, "VIDEO LINKS  /  YT-DLP", 11, Ui.GREEN, true));
         Ui.gap(this, videos, 12);
-        videos.addView(Ui.text(this, "Share a supported link to download one video, then send it to another app. MP4 is preferred, up to 1080p. Downloads use your internet connection and can be cancelled.", 14, Ui.MUTED, false));
+        videos.addView(Ui.text(this, "Share a supported link to download one video, then send it to another app. Choose a default quality below; you can change it for each share. Downloads use your internet connection and can be cancelled.", 14, Ui.MUTED, false));
+        android.widget.Spinner qualityPicker = new android.widget.Spinner(this);
+        qualityPicker.setId(R.id.video_quality);
+        qualityPicker.setContentDescription("Default video quality");
+        qualityPicker.setMinimumHeight(Ui.dp(this, 48));
+        qualityPicker.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                java.util.Arrays.stream(VideoQuality.values()).map(q -> q.label).toArray(String[]::new)));
+        qualityPicker.setSelection(Settings.getVideoQuality(this).ordinal());
+        videos.addView(qualityPicker);
+        videos.addView(Ui.text(this, "Custom loads formats only for the link you share, when selected. Full uses the best available resolution. All qualities keep the 256 MB file limit.", 14, Ui.MUTED, false));
+        qualityPicker.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                Settings.setVideoQuality(MainActivity.this, VideoQuality.values()[position]);
+            }
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
         videos.addView(Ui.text(this, "Video downloads need the optional MiddleShare Video add-on. Install it once from Releases; images need no add-on.", 14, Ui.MUTED, false));
         Button releases = new Button(this);
         releases.setText(R.string.video_releases);

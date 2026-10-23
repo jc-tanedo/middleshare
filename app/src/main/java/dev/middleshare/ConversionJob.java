@@ -28,12 +28,13 @@ final class ConversionJob {
     private final int total;
 
     ConversionJob(Context context, List<Uri> inputs, Settings.Format format) {
-        this(context, inputs, format, null);
+        this(context, inputs, format, null, VideoQuality.STANDARD, null, false);
     }
-    ConversionJob(Context context, String link) {
-        this(context, java.util.Collections.emptyList(), Settings.Format.JPEG, link);
+    ConversionJob(Context context, String link, VideoQuality quality, String customId, boolean needsAudio) {
+        this(context, java.util.Collections.emptyList(), Settings.Format.JPEG, link, quality, customId, needsAudio);
     }
-    private ConversionJob(Context context, List<Uri> inputs, Settings.Format format, String link) {
+    private ConversionJob(Context context, List<Uri> inputs, Settings.Format format, String link,
+                          VideoQuality quality, String customId, boolean needsAudio) {
         Context app = context.getApplicationContext();
         video = link != null;
         downloader = video ? new VideoDownloader() : null;
@@ -44,7 +45,7 @@ final class ConversionJob {
             try {
                 ImageProcessor.cleanExpired(app);
                 if (video) {
-                    results.add(downloader.download(app, link, message -> main.post(() -> {
+                    results.add(downloader.download(app, link, quality, customId, needsAudio, message -> main.post(() -> {
                         status = message;
                         if (listener != null) listener.onStatus(message);
                     })));

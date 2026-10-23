@@ -25,6 +25,9 @@ final class VideoDownloader {
         void init(Context context) throws Exception;
         void execute(YoutubeDLRequest request, String id, Progress progress) throws Exception;
         void cancel(String id);
+        default String inspect(YoutubeDLRequest request, String id) throws Exception {
+            throw new UnsupportedOperationException("Format lookup unavailable.");
+        }
     }
     private static final class NativeEngine implements Engine {
         @Override public void init(Context context) throws Exception {
@@ -45,6 +48,9 @@ final class VideoDownloader {
             });
         }
         @Override public void cancel(String id) { YoutubeDL.getInstance().destroyProcessById(id); }
+        @Override public String inspect(YoutubeDLRequest request, String id) throws Exception {
+            return YoutubeDL.getInstance().execute(request, id, null).getOut();
+        }
     }
     private final Engine engine;
     private final AtomicBoolean cancelled = new AtomicBoolean();
@@ -53,6 +59,9 @@ final class VideoDownloader {
     void cancel() { cancelled.set(true); }
 
     static YoutubeDLRequest request(String url, File work) {
+        return request(url, work, VideoQuality.STANDARD, null, false);
+    }
+    static YoutubeDLRequest request(String url, File work, VideoQuality quality, String customId, boolean needsAudio) {
         YoutubeDLRequest request = new YoutubeDLRequest(url);
         request.addOption("--ignore-config");
         request.addOption("--no-playlist");
@@ -68,13 +77,16 @@ final class VideoDownloader {
         request.addOption("--concurrent-fragments", 2);
         request.addOption("--max-filesize", MAX_VIDEO_BYTES);
         request.addOption("--match-filter", "!is_live & !is_upcoming");
-        request.addOption("-f", "bv*[height<=?1080]+ba/b[height<=?1080]");
-        request.addOption("-S", "res:1080,vcodec:h264,acodec:aac,ext:mp4:m4a");
+        request.addOption("-f", quality.selector(customId, needsAudio));
+        request.addOption("-S", quality.sort());
         request.addOption("--merge-output-format", "mp4/mkv");
         request.addOption("-o", new File(work, "video.%(ext)s").getAbsolutePath());
         return request;
     }
     SharedFile download(Context context, String url, Progress progress) throws IOException {
+        return download(context, url, VideoQuality.STANDARD, null, false, progress);
+    }
+    SharedFile download(Context context, String url, VideoQuality quality, String customId, boolean needsAudio, Progress progress) throws IOException {
         File work = new File(context.getCacheDir(), "video-" + UUID.randomUUID());
         if (!work.mkdirs()) throw new IOException("Cannot create temporary video storage.");
         String id = UUID.randomUUID().toString();
@@ -95,7 +107,7 @@ final class VideoDownloader {
                 if (stopped.get() != null) stop(id);
             }, 0, 250, TimeUnit.MILLISECONDS);
             progress.update("Finding a downloadable video…");
-            engine.execute(request(url, work), id, progress);
+            engine.execute(request(url, work, quality, customId, needsAudio), id, progress);
             checkCancelled();
             if (stopped.get() != null) throw new IOException(stopped.get());
             SharedFile output = prepareOutput(context, work);
@@ -113,6 +125,47 @@ final class VideoDownloader {
             if (cancelled.get() || stopped.get() != null) stop(id);
             monitor.shutdownNow();
             remove(work);
+        }
+    }
+    static YoutubeDLRequest formatsRequest(String url) {
+        YoutubeDLRequest request = new YoutubeDLRequest(url);
+        request.addOption("--ignore-config");
+        request.addOption("--no-playlist");
+        request.addOption("--playlist-items", "1");
+        request.addOption("--no-cache-dir");
+        request.addOption("--skip-download");
+        request.addOption("--dump-single-json");
+        request.addOption("--no-warnings");
+        request.addOption("--socket-timeout", 20);
+        request.addOption("--retries", 1);
+        request.addOption("--extractor-retries", 1);
+        return request;
+    }
+    java.util.List<VideoFormat> formats(Context context, String url) throws IOException {
+        String id = UUID.randomUUID().toString();
+        long start = android.os.SystemClock.elapsedRealtime();
+        AtomicBoolean timedOut = new AtomicBoolean();
+        ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
+        try {
+            checkCancelled();
+            monitor.scheduleWithFixedDelay(() -> {
+                if (android.os.SystemClock.elapsedRealtime() - start > 60_000) timedOut.set(true);
+                if (cancelled.get() || timedOut.get()) stop(id);
+            }, 0, 250, TimeUnit.MILLISECONDS);
+            engine.init(context.getApplicationContext());
+            checkCancelled();
+            if (timedOut.get()) throw new IOException("Format lookup timed out. Try a preset or retry Custom.");
+            String json = engine.inspect(formatsRequest(url), id);
+            checkCancelled();
+            if (timedOut.get()) throw new IOException("Format lookup timed out. Try a preset or retry Custom.");
+            return VideoFormat.parse(json);
+        } catch (IOException e) { throw e; }
+        catch (Exception e) {
+            checkCancelled();
+            throw new IOException("Couldn’t load formats. Check your connection, try a preset, or select Custom to retry.");
+        } finally {
+            monitor.shutdownNow();
+            if (cancelled.get() || timedOut.get()) stop(id);
         }
     }
     private void stop(String id) {

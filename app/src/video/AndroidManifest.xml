@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application>
+        <activity android:name=".VideoQualityActivity" android:exported="false" />
         <activity android:name=".ShareActivity" android:exported="true" android:excludeFromRecents="true" />
     </application>
 </manifest>

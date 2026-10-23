@@ -1,0 +1,7 @@
+<resources>
+    <string name="download_video">Download video</string>
+    <string name="video_format_hint">Choose a format. Video-only formats are paired with available audio; shown video sizes exclude that audio.</string>
+    <string name="video_format_loading">Loading available formats…</string>
+    <string name="video_preset_hint">No format lookup is needed for this preset.</string>
+    <string name="video_formats_empty">No video formats found. Try a preset.</string>
+</resources>

@@ -25,6 +25,32 @@ public class VideoDownloaderTest {
     private Context context;
     @Before public void setup() { context = RuntimeEnvironment.getApplication(); TestStorage.allocatable = 2L * 1024 * 1024 * 1024; }
     private File work() throws IOException { return Files.createTempDirectory(context.getCacheDir().toPath(), "video-test-").toFile(); }
+    @Test public void presetsAndCustomApplyToActualDownloadRequests() throws Exception {
+        for (VideoQuality quality : VideoQuality.values()) {
+            YoutubeDLRequest request = VideoDownloader.request("https://example.com/v", work(), quality, "137", true);
+            assertEquals(quality.selector("137", true), request.getOption("-f"));
+            assertEquals(quality.sort(), request.getOption("-S"));
+            assertTrue(request.hasOption("--max-filesize"));
+        }
+    }
+    @Test public void customLookupOnlyRequestsMetadataAndSupportsCancellation() throws Exception {
+        VideoDownloader downloader = new VideoDownloader(new VideoDownloader.Engine() {
+            public void init(Context app) { }
+            public void execute(YoutubeDLRequest request, String id, VideoDownloader.Progress progress) { fail("Lookup downloaded media"); }
+            public String inspect(YoutubeDLRequest request, String id) {
+                assertTrue(request.hasOption("--skip-download"));
+                assertTrue(request.hasOption("--dump-single-json"));
+                assertTrue(request.hasOption("--ignore-config"));
+                assertTrue(request.hasOption("--no-playlist"));
+                assertFalse(request.hasOption("-o"));
+                return VideoFormatsTest.METADATA;
+            }
+            public void cancel(String id) { }
+        });
+        assertEquals(2, downloader.formats(context, "https://example.com/v").size());
+        downloader.cancel();
+        assertThrows(InterruptedIOException.class, () -> downloader.formats(context, "https://example.com/v"));
+    }
     @Test public void requestUsesOneVideoBoundedRetriesAndNoReencoding() throws Exception {
         YoutubeDLRequest request = VideoDownloader.request("https://example.com/watch", work());
         assertTrue(request.hasOption("--ignore-config"));

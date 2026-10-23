@@ -47,17 +47,18 @@ public class VideoAddonTest {
     }
     @Test public void missingOldUntrustedAndDisabledAddonsAreRejected() {
         assertFalse(VideoAddon.available(context));
-        install(4, 2, true);
-        assertFalse(VideoAddon.available(context));
-        install(3, 1, true);
-        assertFalse(VideoAddon.available(context));
-        install(4, 1, false);
+        install(5, 2, true);
         assertFalse(VideoAddon.available(context));
         install(4, 1, true);
+        assertFalse(VideoAddon.available(context));
+        install(5, 1, false);
+        assertFalse(VideoAddon.available(context));
+        install(5, 1, true);
         assertTrue(VideoAddon.available(context));
     }
     @Test public void installedAddonReceivesOnlyTheParsedLinkAndMainFinishes() {
-        install(4, 1, true);
+        install(5, 1, true);
+        Settings.setVideoQuality(context, VideoQuality.MOBILE);
         Intent incoming = new Intent(context, ShareActivity.class).setAction(Intent.ACTION_SEND)
                 .setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Watch https://example.org/video")
                 .putExtra("untrusted-extra", "never forward");
@@ -69,6 +70,7 @@ public class VideoAddonTest {
             assertEquals(ShareActivity.class.getName(), outgoing.getComponent().getClassName());
             assertEquals("https://example.org/video", outgoing.getStringExtra(Intent.EXTRA_TEXT));
             assertFalse(outgoing.hasExtra("untrusted-extra"));
+            assertEquals("MOBILE", outgoing.getStringExtra(VideoAddon.QUALITY));
             assertTrue(controller.get().isFinishing());
         } finally { controller.pause().stop().destroy(); }
     }
@@ -84,7 +86,7 @@ public class VideoAddonTest {
             var releases = shadowOf(controller.get()).getNextStartedActivity();
             assertEquals(Intent.ACTION_VIEW, releases.getAction());
             assertEquals(VideoAddon.RELEASES, releases.getDataString());
-            install(4, 1, true);
+            install(5, 1, true);
             controller.get().findViewById(R.id.video_retry).performClick();
             assertEquals(VideoAddon.PACKAGE, shadowOf(controller.get()).getNextStartedActivity()
                     .getComponent().getPackageName());

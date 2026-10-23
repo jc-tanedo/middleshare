@@ -49,7 +49,15 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
                     handOffVideo();
                     return;
                 }
-                job = link != null ? new ConversionJob(getApplicationContext(), link)
+                VideoQuality quality = VideoQuality.parse(getIntent().getStringExtra(VideoAddon.QUALITY));
+                if (link != null && BuildConfig.VIDEO_TOOLS && !getIntent().getBooleanExtra(VideoAddon.CONFIRMED, false)) {
+                    startActivity(new Intent().setClassName(this, "dev.middleshare.VideoQualityActivity")
+                            .putExtra(Intent.EXTRA_TEXT, link).putExtra(VideoAddon.QUALITY, quality.name()));
+                    finish();
+                    return;
+                }
+                job = link != null ? new ConversionJob(getApplicationContext(), link, quality,
+                        getIntent().getStringExtra(VideoAddon.FORMAT), getIntent().getBooleanExtra(VideoAddon.AUDIO, false))
                         : new ConversionJob(getApplicationContext(), ShareIntents.read(getIntent()), Settings.getFormat(this));
             } catch (IOException e) { showError(e.getMessage()); }
             catch (RuntimeException e) { showError("The shared payload is invalid. Please try sharing the image or video link again."); }
@@ -58,7 +66,7 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
     private void handOffVideo() {
         if (VideoAddon.available(this)) {
             try {
-                startActivity(VideoAddon.share(pendingLink));
+                startActivity(VideoAddon.share(this, pendingLink));
                 finish();
                 return;
             } catch (ActivityNotFoundException | SecurityException ignored) { /* Offer reinstall. */ }
