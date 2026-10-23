@@ -28,7 +28,10 @@ public class VideoDownloaderTest {
     @Test public void presetsAndCustomApplyToActualDownloadRequests() throws Exception {
         for (VideoQuality quality : VideoQuality.values()) {
             YoutubeDLRequest request = VideoDownloader.request("https://example.com/v", work(), quality, "137", true);
-            assertEquals(quality.selector("137", true), request.getOption("-f"));
+            if (quality == VideoQuality.BEST) {
+                assertFalse(request.hasOption("-f"));
+                assertFalse(request.hasOption("-S"));
+            } else assertEquals(quality.selector("137", true), request.getOption("-f"));
             assertEquals(quality.sort(), request.getOption("-S"));
             assertTrue(request.hasOption("--max-filesize"));
         }

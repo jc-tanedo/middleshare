@@ -59,7 +59,7 @@ final class VideoDownloader {
     void cancel() { cancelled.set(true); }
 
     static YoutubeDLRequest request(String url, File work) {
-        return request(url, work, VideoQuality.STANDARD, null, false);
+        return request(url, work, VideoQuality.BEST, null, false);
     }
     static YoutubeDLRequest request(String url, File work, VideoQuality quality, String customId, boolean needsAudio) {
         YoutubeDLRequest request = new YoutubeDLRequest(url);
@@ -77,14 +77,16 @@ final class VideoDownloader {
         request.addOption("--concurrent-fragments", 2);
         request.addOption("--max-filesize", MAX_VIDEO_BYTES);
         request.addOption("--match-filter", "!is_live & !is_upcoming");
-        request.addOption("-f", quality.selector(customId, needsAudio));
-        request.addOption("-S", quality.sort());
+        if (quality != VideoQuality.BEST) {
+            request.addOption("-f", quality.selector(customId, needsAudio));
+            if (quality.sort() != null) request.addOption("-S", quality.sort());
+        }
         request.addOption("--merge-output-format", "mp4/mkv");
         request.addOption("-o", new File(work, "video.%(ext)s").getAbsolutePath());
         return request;
     }
     SharedFile download(Context context, String url, Progress progress) throws IOException {
-        return download(context, url, VideoQuality.STANDARD, null, false, progress);
+        return download(context, url, VideoQuality.BEST, null, false, progress);
     }
     SharedFile download(Context context, String url, VideoQuality quality, String customId, boolean needsAudio, Progress progress) throws IOException {
         File work = new File(context.getCacheDir(), "video-" + UUID.randomUUID());

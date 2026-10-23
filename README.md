@@ -20,24 +20,25 @@ The main app accepts only an enabled add-on with the expected package, supported
 - **Appearance:** Uses the device theme by default, including automatic light/dark changes. Choose **Light** or **Dark** to override it.
 - **Try an image:** The home screen can open the system document picker.
 
-The optional video add-on contains yt-dlp with Python, QuickJS, and FFmpeg. The main APK contains none of these runtimes. The tools initialize only for video links. MP4/H.264/AAC are preferred; Standard defaults to at most 1080p, Mobile to 480p, and Full has no resolution cap. Separate streams are merged without re-encoding. WebM or MKV may be used when an MP4-compatible source is unavailable. No conversion server is used. Link downloads contact the original site and consume your internet connection; image conversion stays local.
+The optional video add-on contains yt-dlp with Python, QuickJS, and FFmpeg. The main APK contains none of these runtimes. The tools initialize only for video links. Best leaves format selection to yt-dlp. Mobile and Standard cap the resolution at 480p and 1080p; Full has no resolution cap. Separate streams are merged without re-encoding. WebM or MKV may be used when an MP4-compatible source is unavailable. No conversion server is used. Link downloads contact the original site and consume your internet connection; image conversion stays local.
 
 ## Video quality
 
-Choose the default in the main app’s **Video links** settings. Each video share opens a quality screen in the add-on so you can change the choice before downloading:
+Choose the default or add per-domain overrides in the main app’s **Video links** settings. Sharing a link opens a compact bottom drawer where you can change quality for that download. A saved host preference overrides the global default for links from that host.
 
 | Quality | Selection |
 | --- | --- |
 | Mobile | Best available video up to 480p; smaller downloads |
-| Standard (default) | Best available video up to 1080p |
+| Best (default) | Let yt-dlp choose its default format without extra format sorting |
+| Standard | Best available video up to 1080p |
 | Full | Best available resolution; potentially much larger |
 | Custom | Fetch this link’s formats on demand, then choose an exact video format |
 
-Presets start without a separate format-list lookup. Merely opening settings or the quality screen with a preset selected never requests format metadata. Selecting **Custom** performs a cancellable metadata lookup (60-second deadline), then shows resolution, container, codec, frame rate, and known/estimated size. Video-only formats are paired with available audio. Sizes for these formats exclude added audio. DRM, audio-only, and storyboard formats are excluded.
+Presets start without a separate format-list lookup. Merely opening settings or the quality drawer with a preset selected never requests format metadata. Selecting **Custom** performs a cancellable metadata lookup (60-second deadline), then shows resolution, container, codec, frame rate, and known/estimated size. Video-only formats are paired with available audio. Sizes for these formats exclude added audio. DRM, audio-only, and storyboard formats are excluded.
 
 Custom format IDs are specific to the shared link and are never saved as a global default. Results are reused within the share, including across rotation; leaving Custom cancels an unfinished lookup. If loading fails, tap Custom again to retry or use a preset. Resolution caps apply when the source reports dimensions; sources with unknown resolution may pass through. All choices retain the 256 MiB final-file, temporary-storage, and download-time limits below. Full is not an unlimited file-size setting.
 
-Use main/add-on version 0.4.0 or later together; an older add-on is rejected so it cannot silently ignore quality settings.
+Use main/add-on version 0.5.0 or later together; an older add-on is rejected so it cannot silently ignore quality settings.
 
 ## Download behavior
 

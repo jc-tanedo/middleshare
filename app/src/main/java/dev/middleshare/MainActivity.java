@@ -89,6 +89,61 @@ public final class MainActivity extends Activity {
             }
             public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         });
+        Ui.gap(this, videos, 12);
+        videos.addView(Ui.text(this, "PER-SITE QUALITY", 11, Ui.GREEN, true));
+        videos.addView(Ui.text(this, "Set a saved quality for a host. It overrides the default for links from that site.", 14, Ui.MUTED, false));
+        android.widget.EditText domain = new android.widget.EditText(this);
+        domain.setId(R.id.video_domain);
+        domain.setSingleLine(true);
+        domain.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        domain.setHint(R.string.domain_hint);
+        domain.setContentDescription("Website domain");
+        videos.addView(domain);
+        android.widget.Spinner domainQuality = new android.widget.Spinner(this);
+        domainQuality.setId(R.id.video_domain_quality);
+        domainQuality.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                java.util.Arrays.stream(VideoQuality.values()).filter(q -> q != VideoQuality.CUSTOM).map(q -> q.label).toArray(String[]::new)));
+        videos.addView(domainQuality);
+        Button saveDomain = new Button(this);
+        saveDomain.setText(R.string.save_site_quality);
+        saveDomain.setAllCaps(false);
+        videos.addView(saveDomain);
+        Button clearDomain = new Button(this);
+        clearDomain.setText(R.string.clear_site_quality);
+        clearDomain.setAllCaps(false);
+        videos.addView(clearDomain);
+        TextView savedDomains = Ui.text(this, "", 14, Ui.MUTED, false);
+        videos.addView(savedDomains);
+        Runnable refreshDomains = () -> {
+            java.util.List<String> hosts = Settings.videoQualityHosts(this);
+            savedDomains.setText(hosts.isEmpty() ? getString(R.string.no_site_preferences)
+                    : getString(R.string.saved_sites, String.join(", ", hosts)));
+        };
+        refreshDomains.run();
+        saveDomain.setOnClickListener(v -> {
+            String host = Settings.videoHost(domain.getText().toString().contains("://")
+                    ? domain.getText().toString() : "https://" + domain.getText().toString());
+            if (host == null || host.isBlank()) {
+                domain.setError(getString(R.string.invalid_domain));
+                return;
+            }
+            VideoQuality selected = java.util.Arrays.stream(VideoQuality.values()).filter(q -> q != VideoQuality.CUSTOM)
+                    .toArray(VideoQuality[]::new)[domainQuality.getSelectedItemPosition()];
+            Settings.setVideoQuality(this, host, selected);
+            domain.setText("");
+            refreshDomains.run();
+        });
+        clearDomain.setOnClickListener(v -> {
+            String host = Settings.videoHost(domain.getText().toString().contains("://")
+                    ? domain.getText().toString() : "https://" + domain.getText().toString());
+            if (host == null || host.isBlank()) {
+                domain.setError(getString(R.string.clear_domain_prompt));
+                return;
+            }
+            Settings.clearVideoQuality(this, host);
+            domain.setText("");
+            refreshDomains.run();
+        });
         videos.addView(Ui.text(this, "Video downloads need the optional MiddleShare Video add-on. Install it once from Releases; images need no add-on.", 14, Ui.MUTED, false));
         Button releases = new Button(this);
         releases.setText(R.string.video_releases);

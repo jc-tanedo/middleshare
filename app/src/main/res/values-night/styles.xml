@@ -9,4 +9,11 @@
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowBackground">@color/background</item>
     </style>
+    <style name="ShareSheetTheme" parent="AppTheme">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@drawable/share_sheet_background</item>
+        <item name="android:backgroundDimAmount">0.32</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
 </resources>

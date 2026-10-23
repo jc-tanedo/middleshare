@@ -22,6 +22,10 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
     }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        if (getWindow() != null) {
+            getWindow().setGravity(android.view.Gravity.BOTTOM);
+            getWindow().setLayout(-1, -2);
+        }
         page = Ui.screen(this);
         page.addView(Ui.text(this, "MIDDLESHARE", 12, Ui.GREEN, true));
         Ui.gap(this, page, 48);

@@ -2,6 +2,12 @@ package dev.middleshare;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import java.net.IDN;
+import java.net.URI;
+import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 final class Settings {
     static final int JPEG_QUALITY = 92;
@@ -13,7 +19,35 @@ final class Settings {
     }
     enum Theme { SYSTEM, LIGHT, DARK }
     static VideoQuality getVideoQuality(Context context) {
-        return VideoQuality.parse(prefs(context).getString("video_quality", VideoQuality.STANDARD.name()));
+        return VideoQuality.parse(prefs(context).getString("video_quality", VideoQuality.BEST.name()));
+    }
+    static String videoHost(String link) {
+        try {
+            String host = URI.create(link).getHost();
+            if (host == null) return null;
+            host = IDN.toASCII(host).toLowerCase(Locale.ROOT);
+            if (host.startsWith("www.")) host = host.substring(4);
+            return host;
+        } catch (IllegalArgumentException ignored) { return null; }
+    }
+    static VideoQuality getVideoQuality(Context context, String host) {
+        if (host == null) return getVideoQuality(context);
+        return VideoQuality.parse(prefs(context).getString("video_quality_host_" + host, getVideoQuality(context).name()));
+    }
+    static void setVideoQuality(Context context, String host, VideoQuality quality) {
+        if (host == null) return;
+        prefs(context).edit().putString("video_quality_host_" + host, quality.name()).apply();
+    }
+    static List<String> videoQualityHosts(Context context) {
+        List<String> hosts = new ArrayList<>();
+        for (String key : prefs(context).getAll().keySet()) {
+            if (key.startsWith("video_quality_host_")) hosts.add(key.substring("video_quality_host_".length()));
+        }
+        Collections.sort(hosts);
+        return hosts;
+    }
+    static void clearVideoQuality(Context context, String host) {
+        if (host != null) prefs(context).edit().remove("video_quality_host_" + host).apply();
     }
     static void setVideoQuality(Context context, VideoQuality quality) {
         prefs(context).edit().putString("video_quality", quality.name()).apply();

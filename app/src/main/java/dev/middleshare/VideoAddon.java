@@ -14,7 +14,7 @@ import android.widget.Toast;
 final class VideoAddon {
     static final String PACKAGE = "dev.middleshare.video";
     static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final int MIN_VERSION = 5;
+    static final int MIN_VERSION = 6;
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String CONFIRMED = "dev.middleshare.CONFIRMED";
     static final String FORMAT = "dev.middleshare.FORMAT";
@@ -36,7 +36,7 @@ final class VideoAddon {
         return new Intent(Intent.ACTION_SEND).setType("text/plain")
                 .setComponent(new ComponentName(PACKAGE, ShareActivity.class.getName()))
                 .putExtra(Intent.EXTRA_TEXT, link)
-                .putExtra(QUALITY, Settings.getVideoQuality(context).name());
+                .putExtra(QUALITY, Settings.getVideoQuality(context, Settings.videoHost(link)).name());
     }
 
     static void releases(Activity activity) {

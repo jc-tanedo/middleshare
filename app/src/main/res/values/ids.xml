@@ -1,6 +1,8 @@
 <resources>
     <item name="video_format_status" type="id" />
     <item name="video_quality" type="id" />
+    <item name="video_domain" type="id" />
+    <item name="video_domain_quality" type="id" />
     <item name="video_download" type="id" />
     <item name="video_custom" type="id" />
     <item name="video_formats" type="id" />

@@ -28,7 +28,7 @@ final class ConversionJob {
     private final int total;
 
     ConversionJob(Context context, List<Uri> inputs, Settings.Format format) {
-        this(context, inputs, format, null, VideoQuality.STANDARD, null, false);
+        this(context, inputs, format, null, VideoQuality.BEST, null, false);
     }
     ConversionJob(Context context, String link, VideoQuality quality, String customId, boolean needsAudio) {
         this(context, java.util.Collections.emptyList(), Settings.Format.JPEG, link, quality, customId, needsAudio);

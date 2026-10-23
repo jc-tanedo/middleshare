@@ -15,11 +15,12 @@ import android.widget.TextView;
 /** The format lookup starts only when Custom becomes the selected option. */
 public class VideoQualityActivity extends Activity implements VideoFormatsJob.Listener {
     private String link;
-    private VideoQuality quality = VideoQuality.STANDARD;
+    private VideoQuality quality = VideoQuality.BEST;
     private VideoFormatsJob lookup;
     private TextView status;
     private Spinner formats;
     private Button download;
+    private String host;
     private int selectedFormat;
     private static final class Retained {
         final VideoFormatsJob lookup;
@@ -34,8 +35,14 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
     }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        if (getWindow() != null) {
+            getWindow().setGravity(android.view.Gravity.BOTTOM);
+            getWindow().setLayout(-1, -2);
+        }
         link = getIntent().getStringExtra(Intent.EXTRA_TEXT);
         if (link == null || !link.startsWith("https://") && !link.startsWith("http://")) { finish(); return; }
+        host = Settings.videoHost(link);
+        quality = Settings.getVideoQuality(this, host);
         quality = VideoQuality.parse(getIntent().getStringExtra(VideoAddon.QUALITY));
         if (state != null) {
             quality = VideoQuality.parse(state.getString("quality"));
@@ -46,7 +53,8 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
             lookup = retained.lookup; quality = retained.quality; selectedFormat = retained.selected;
         }
         LinearLayout page = Ui.screen(this);
-        page.addView(Ui.text(this, "Video quality", 30, Ui.INK, true));
+        page.addView(Ui.text(this, "Share video", 26, Ui.INK, true));
+        page.addView(Ui.text(this, host == null ? link : host, 14, Ui.MUTED, false));
         page.addView(Ui.text(this, "Choose for this share. MP4 is preferred; the 256 MB file limit still applies.", 16, Ui.MUTED, false));
         RadioGroup choices = new RadioGroup(this);
         for (VideoQuality option : VideoQuality.values()) {

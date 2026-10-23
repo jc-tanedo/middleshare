@@ -11,7 +11,7 @@ public class CoreSettingsTest {
     @Test public void videoQualityDefaultAndCustomChoicePersistWithoutAnyFormatLookup() {
         var controller = Robolectric.buildActivity(MainActivity.class).setup();
         try {
-            assertEquals(VideoQuality.STANDARD, Settings.getVideoQuality(controller.get()));
+            assertEquals(VideoQuality.BEST, Settings.getVideoQuality(controller.get()));
             android.widget.Spinner picker = controller.get().findViewById(R.id.video_quality);
             picker.setSelection(VideoQuality.CUSTOM.ordinal());
             org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle();
