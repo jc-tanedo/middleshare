@@ -53,11 +53,11 @@ public class VideoAddonTest {
         assertFalse(VideoAddon.available(context));
         install(5, 1, false);
         assertFalse(VideoAddon.available(context));
-        install(5, 1, true);
+        install(6, 1, true);
         assertTrue(VideoAddon.available(context));
     }
     @Test public void installedAddonReceivesOnlyTheParsedLinkAndMainFinishes() {
-        install(5, 1, true);
+        install(6, 1, true);
         Settings.setVideoQuality(context, VideoQuality.MOBILE);
         Intent incoming = new Intent(context, ShareActivity.class).setAction(Intent.ACTION_SEND)
                 .setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Watch https://example.org/video")
@@ -86,7 +86,7 @@ public class VideoAddonTest {
             var releases = shadowOf(controller.get()).getNextStartedActivity();
             assertEquals(Intent.ACTION_VIEW, releases.getAction());
             assertEquals(VideoAddon.RELEASES, releases.getDataString());
-            install(5, 1, true);
+            install(6, 1, true);
             controller.get().findViewById(R.id.video_retry).performClick();
             assertEquals(VideoAddon.PACKAGE, shadowOf(controller.get()).getNextStartedActivity()
                     .getComponent().getPackageName());
