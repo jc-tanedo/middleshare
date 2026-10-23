@@ -22,11 +22,12 @@
     <string name="credits_unavailable">The included license notices could not be loaded. Please reinstall MiddleShare.</string>
     <string name="no_browser">No browser is available to open this link.</string>
     <string name="domain_hint">example.com</string>
-    <string name="save_site_quality">Save site quality</string>
-    <string name="clear_site_quality">Clear site preference</string>
     <string name="no_site_preferences">No site preferences saved.</string>
-    <string name="saved_sites">Saved sites: %1$s</string>
     <string name="invalid_domain">Enter a valid domain, such as example.com</string>
-    <string name="clear_domain_prompt">Enter the domain whose preference you want to clear</string>
     <string name="preparing_share_file">Preparing shared file</string>
+    <string name="site_preferences">Site preferences</string>
+    <string name="add_site">Add site</string>
+    <string name="edit_site">Edit site</string>
+    <string name="save">Save</string>
+    <string name="remove">Remove</string>
 </resources>

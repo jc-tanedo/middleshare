@@ -55,16 +55,17 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
         LinearLayout page = Ui.screen(this);
         page.setMinimumWidth(Ui.dp(this, 320));
         page.setMinimumHeight(Ui.dp(this, 320));
+        Ui.handle(this, page);
         page.addView(Ui.text(this, "Share video", 26, Ui.INK, true));
         page.addView(Ui.text(this, host == null ? link : host, 14, Ui.MUTED, false));
-        page.addView(Ui.text(this, "Choose for this share. MP4 is preferred; the 256 MB file limit still applies.", 16, Ui.MUTED, false));
+        Ui.gap(this, page, 12);
         RadioGroup choices = new RadioGroup(this);
         for (VideoQuality option : VideoQuality.values()) {
             RadioButton button = new RadioButton(this);
             button.setId(option == VideoQuality.CUSTOM ? R.id.video_custom : View.generateViewId());
             button.setTag(option);
             button.setText(option.label);
-            button.setMinHeight(Ui.dp(this, 52));
+            Ui.choice(this, button);
             choices.addView(button);
             if (option == quality) choices.check(button.getId());
         }
@@ -76,21 +77,23 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
         formats = new Spinner(this);
         formats.setId(R.id.video_formats);
         formats.setContentDescription("Available video formats");
-        formats.setMinimumHeight(Ui.dp(this, 52));
+        Ui.field(this, formats);
         formats.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { selectedFormat = position; }
             public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         });
         page.addView(formats);
-        download = new Button(this);
+        download = Ui.button(this, R.string.download_video, true);
         download.setId(R.id.video_download);
         download.setText(R.string.download_video);
         download.setOnClickListener(v -> download());
-        page.addView(download);
-        Button cancel = new Button(this);
+        Ui.gap(this, page, 16);
+        page.addView(download, new LinearLayout.LayoutParams(-1, -2));
+        Ui.gap(this, page, 8);
+        Button cancel = Ui.button(this, R.string.cancel, false);
         cancel.setText(R.string.cancel);
         cancel.setOnClickListener(v -> finish());
-        page.addView(cancel);
+        page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
         choices.setOnCheckedChangeListener((group, id) -> {
             RadioButton selected = group.findViewById(id);
             if (selected != null) { quality = (VideoQuality) selected.getTag(); selectQuality(); }

@@ -1,44 +1,53 @@
 package dev.middleshare;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public final class MainActivity extends Activity {
+    private static final VideoQuality[] SITE_QUALITIES = java.util.Arrays.stream(VideoQuality.values())
+            .filter(q -> q != VideoQuality.CUSTOM).toArray(VideoQuality[]::new);
+
     @Override protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(Ui.themedContext(base));
     }
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-        if (BuildConfig.VIDEO_TOOLS) { showVideoAddon(); return; }
         LinearLayout page = Ui.screen(this);
-        page.addView(Ui.text(this, "MIDDLESHARE  /  SHARE TOOLS", 12, Ui.GREEN, true));
-        Ui.gap(this, page, 24);
-        page.addView(Ui.text(this, "A little change.\nA smoother share.", 34, Ui.INK, true));
+        LinearLayout brand = new LinearLayout(this);
+        brand.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        android.widget.ImageView mark = new android.widget.ImageView(this);
+        mark.setImageResource(R.drawable.ic_brand_mark);
+        mark.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        LinearLayout.LayoutParams markParams = new LinearLayout.LayoutParams(Ui.dp(this, 44), Ui.dp(this, 44));
+        markParams.setMarginEnd(Ui.dp(this, 12));
+        brand.addView(mark, markParams);
+        brand.addView(Ui.text(this, BuildConfig.VIDEO_TOOLS ? "MiddleShare Video" : "MiddleShare", 26, Ui.INK, true));
+        page.addView(brand);
         Ui.gap(this, page, 12);
-        page.addView(Ui.text(this, "Convert WebP images or turn a supported video link into a shareable file.", 16, Ui.MUTED, false));
+        page.addView(Ui.text(this, "A smoother way to share.", 16, Ui.MUTED, false));
         Ui.gap(this, page, 28);
+        if (BuildConfig.VIDEO_TOOLS) { showVideoAddon(page); return; }
 
-        LinearLayout settings = Ui.card(this, page);
-        settings.addView(Ui.text(this, "YOUR DEFAULT PROCESSOR", 11, Ui.GREEN, true));
-        Ui.gap(this, settings, 12);
-        TextView rule = Ui.text(this, "", 26, Ui.INK, true);
-        settings.addView(rule);
-        Ui.gap(this, settings, 8);
-        settings.addView(Ui.text(this, "Choose the format for incoming WebP images. Other image formats pass through unchanged.", 14, Ui.MUTED, false));
-        Ui.gap(this, settings, 16);
+        LinearLayout images = Ui.card(this, page);
+        Ui.heading(this, images, "Images", "Turn WebP into a format your destination app accepts.");
+        TextView rule = Ui.text(this, "", 14, Ui.GREEN, true);
+        images.addView(rule);
+        Ui.gap(this, images, 12);
         RadioGroup formats = new RadioGroup(this);
-        formats.setOrientation(RadioGroup.VERTICAL);
-        RadioButton jpeg = option("JPEG · widest compatibility\n92% quality · white background", 1);
-        RadioButton png = option("PNG · keep transparency\nLossless · usually a larger file", 2);
-        formats.addView(jpeg);
-        formats.addView(png);
-        settings.addView(formats);
+        formats.addView(option("JPEG\nSmaller files · widest compatibility", 1));
+        formats.addView(option("PNG\nLossless · keeps transparency", 2));
+        images.addView(formats);
         Settings.Format current = Settings.getFormat(this);
         formats.check(current == Settings.Format.JPEG ? 1 : 2);
         rule.setText(getString(R.string.processor_rule, current.name()));
@@ -48,156 +57,137 @@ public final class MainActivity extends Activity {
             rule.setText(getString(R.string.processor_rule, format.name()));
             rule.announceForAccessibility("Default saved: " + format.name());
         });
-        Ui.gap(this, page, 24);
-        LinearLayout appearance = Ui.card(this, page);
-        appearance.addView(Ui.text(this, "APPEARANCE", 11, Ui.GREEN, true));
-        Ui.gap(this, appearance, 8);
-        android.widget.Spinner themePicker = new android.widget.Spinner(this);
-        themePicker.setContentDescription("Color theme");
-        themePicker.setMinimumHeight(Ui.dp(this, 48));
-        themePicker.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Use device theme", "Light", "Dark"}));
-        themePicker.setSelection(Settings.getTheme(this).ordinal());
-        appearance.addView(themePicker);
-        themePicker.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
-                Settings.Theme selected = Settings.Theme.values()[position];
-                if (selected != Settings.getTheme(MainActivity.this)) {
-                    Settings.setTheme(MainActivity.this, selected);
-                    recreate();
-                }
+        Ui.gap(this, images, 10);
+        Button pick = Ui.button(this, R.string.try_image, true);
+        pick.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE);
+            try { startActivityForResult(intent, 10); }
+            catch (android.content.ActivityNotFoundException e) {
+                new AlertDialog.Builder(this).setMessage("No image picker is available on this device.").setPositiveButton("OK", null).show();
             }
-            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         });
-        Ui.gap(this, page, 24);
+        images.addView(pick, new LinearLayout.LayoutParams(-1, -2));
+
         LinearLayout videos = Ui.card(this, page);
-        videos.addView(Ui.text(this, "VIDEO LINKS  /  YT-DLP", 11, Ui.GREEN, true));
-        Ui.gap(this, videos, 12);
-        videos.addView(Ui.text(this, "Share a supported link to download one video, then send it to another app. Choose a default quality below; you can change it for each share. Downloads use your internet connection and can be cancelled.", 14, Ui.MUTED, false));
-        android.widget.Spinner qualityPicker = new android.widget.Spinner(this);
-        qualityPicker.setId(R.id.video_quality);
-        qualityPicker.setContentDescription("Default video quality");
-        qualityPicker.setMinimumHeight(Ui.dp(this, 48));
-        qualityPicker.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                java.util.Arrays.stream(VideoQuality.values()).map(q -> q.label).toArray(String[]::new)));
-        qualityPicker.setSelection(Settings.getVideoQuality(this).ordinal());
-        videos.addView(qualityPicker);
-        videos.addView(Ui.text(this, "Custom loads formats only for the link you share, when selected. Full uses the best available resolution. All qualities keep the 256 MB file limit.", 14, Ui.MUTED, false));
-        qualityPicker.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+        Ui.heading(this, videos, "Video links", "Download a video, then send it straight to another app.");
+        videos.addView(Ui.text(this, VideoAddon.available(this) ? "Video add-on installed" : "Optional video add-on", 13, Ui.GREEN, true));
+        Ui.gap(this, videos, 16);
+        videos.addView(Ui.text(this, "Default quality", 14, Ui.MUTED, true));
+        Spinner quality = picker(java.util.Arrays.stream(VideoQuality.values()).map(q -> q.label).toArray(String[]::new), "Default video quality");
+        quality.setId(R.id.video_quality);
+        quality.setSelection(Settings.getVideoQuality(this).ordinal());
+        videos.addView(quality);
+        quality.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                 Settings.setVideoQuality(MainActivity.this, VideoQuality.values()[position]);
             }
             public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         });
-        Ui.gap(this, videos, 12);
-        videos.addView(Ui.text(this, "PER-SITE QUALITY", 11, Ui.GREEN, true));
-        videos.addView(Ui.text(this, "Set a saved quality for a host. It overrides the default for links from that site.", 14, Ui.MUTED, false));
-        android.widget.EditText domain = new android.widget.EditText(this);
+        Ui.gap(this, videos, 10);
+        videos.addView(Ui.text(this, "Best lets yt-dlp choose. Custom loads available formats when you share a link. Up to 256 MB per video.", 13, Ui.MUTED, false));
+        Ui.gap(this, videos, 16);
+        Button sites = Ui.button(this, R.string.site_preferences, false);
+        sites.setOnClickListener(v -> showSites());
+        videos.addView(sites, new LinearLayout.LayoutParams(-1, -2));
+        if (!VideoAddon.available(this)) {
+            Ui.gap(this, videos, 8);
+            Button releases = Ui.button(this, R.string.video_releases, false);
+            releases.setOnClickListener(v -> VideoAddon.releases(this));
+            videos.addView(releases, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        LinearLayout appearance = Ui.card(this, page);
+        Ui.heading(this, appearance, "Appearance", "Follow your device, or make it your own.");
+        Spinner theme = picker(new String[]{"Use device theme", "Light", "Dark · Nord"}, "Color theme");
+        theme.setSelection(Settings.getTheme(this).ordinal());
+        appearance.addView(theme);
+        theme.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                Settings.Theme selected = Settings.Theme.values()[position];
+                if (selected != Settings.getTheme(MainActivity.this)) { Settings.setTheme(MainActivity.this, selected); recreate(); }
+            }
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
+        LinearLayout help = Ui.card(this, page);
+        Ui.heading(this, help, "Share from anywhere", "Share an image or link → MiddleShare → choose your destination.");
+        help.addView(Ui.text(this, "Images are processed on your device. Video downloads connect to the source site. Other image formats pass through unchanged.", 13, Ui.MUTED, false));
+        addAbout(page);
+    }
+    private Spinner picker(String[] labels, String description) {
+        Spinner picker = new Spinner(this);
+        picker.setContentDescription(description);
+        picker.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, labels));
+        Ui.field(this, picker);
+        return picker;
+    }
+    private void showSites() {
+        java.util.List<String> hosts = Settings.videoQualityHosts(this);
+        String[] labels = hosts.stream().map(h -> h + "\n" + Settings.getVideoQuality(this, h).label).toArray(String[]::new);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(R.string.site_preferences);
+        if (hosts.isEmpty()) builder.setMessage(R.string.no_site_preferences);
+        else builder.setItems(labels, (dialog, which) -> editSite(hosts.get(which)));
+        Ui.styleDialog(this, builder.setPositiveButton(R.string.add_site, (dialog, which) -> editSite(null))
+                .setNegativeButton(R.string.close, null).show());
+    }
+    private void editSite(String existingHost) {
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(Ui.dp(this, 24), Ui.dp(this, 12), Ui.dp(this, 24), Ui.dp(this, 8));
+        form.addView(Ui.text(this, "This site's quality overrides your default. Other sites keep using the default.", 14, Ui.MUTED, false));
+        Ui.gap(this, form, 16);
+        EditText domain = new EditText(this);
         domain.setId(R.id.video_domain);
         domain.setSingleLine(true);
         domain.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
         domain.setHint(R.string.domain_hint);
         domain.setContentDescription("Website domain");
-        videos.addView(domain);
-        android.widget.Spinner domainQuality = new android.widget.Spinner(this);
-        domainQuality.setId(R.id.video_domain_quality);
-        domainQuality.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                java.util.Arrays.stream(VideoQuality.values()).filter(q -> q != VideoQuality.CUSTOM).map(q -> q.label).toArray(String[]::new)));
-        videos.addView(domainQuality);
-        Button saveDomain = new Button(this);
-        saveDomain.setText(R.string.save_site_quality);
-        saveDomain.setAllCaps(false);
-        videos.addView(saveDomain);
-        Button clearDomain = new Button(this);
-        clearDomain.setText(R.string.clear_site_quality);
-        clearDomain.setAllCaps(false);
-        videos.addView(clearDomain);
-        TextView savedDomains = Ui.text(this, "", 14, Ui.MUTED, false);
-        videos.addView(savedDomains);
-        Runnable refreshDomains = () -> {
-            java.util.List<String> hosts = Settings.videoQualityHosts(this);
-            savedDomains.setText(hosts.isEmpty() ? getString(R.string.no_site_preferences)
-                    : getString(R.string.saved_sites, String.join(", ", hosts)));
-        };
-        refreshDomains.run();
-        saveDomain.setOnClickListener(v -> {
-            String host = Settings.videoHost(domain.getText().toString().contains("://")
-                    ? domain.getText().toString() : "https://" + domain.getText().toString());
-            if (host == null || host.isBlank()) {
-                domain.setError(getString(R.string.invalid_domain));
-                return;
-            }
-            VideoQuality selected = java.util.Arrays.stream(VideoQuality.values()).filter(q -> q != VideoQuality.CUSTOM)
-                    .toArray(VideoQuality[]::new)[domainQuality.getSelectedItemPosition()];
-            Settings.setVideoQuality(this, host, selected);
-            domain.setText("");
-            refreshDomains.run();
+        Ui.field(this, domain);
+        if (existingHost != null) domain.setText(existingHost);
+        form.addView(domain);
+        Ui.gap(this, form, 12);
+        Spinner quality = picker(java.util.Arrays.stream(SITE_QUALITIES).map(q -> q.label).toArray(String[]::new), "Site video quality");
+        quality.setId(R.id.video_domain_quality);
+        if (existingHost != null) {
+            VideoQuality saved = Settings.getVideoQuality(this, existingHost);
+            for (int i = 0; i < SITE_QUALITIES.length; i++) if (SITE_QUALITIES[i] == saved) quality.setSelection(i);
+        }
+        form.addView(quality);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(existingHost == null ? R.string.add_site : R.string.edit_site)
+                .setView(form).setPositiveButton(R.string.save, null).setNegativeButton(R.string.cancel, null);
+        if (existingHost != null) builder.setNeutralButton(R.string.remove,
+                (d, which) -> Settings.clearVideoQuality(this, existingHost));
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(d -> {
+            Ui.styleDialog(this, dialog);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String input = domain.getText().toString().trim();
+                String host = Settings.videoHost(input.contains("://") ? input : "https://" + input);
+                if (host == null || host.isBlank()) { domain.setError(getString(R.string.invalid_domain)); return; }
+                if (existingHost != null && !existingHost.equals(host)) Settings.clearVideoQuality(this, existingHost);
+                Settings.setVideoQuality(this, host, SITE_QUALITIES[quality.getSelectedItemPosition()]);
+                dialog.dismiss();
+            });
         });
-        clearDomain.setOnClickListener(v -> {
-            String host = Settings.videoHost(domain.getText().toString().contains("://")
-                    ? domain.getText().toString() : "https://" + domain.getText().toString());
-            if (host == null || host.isBlank()) {
-                domain.setError(getString(R.string.clear_domain_prompt));
-                return;
-            }
-            Settings.clearVideoQuality(this, host);
-            domain.setText("");
-            refreshDomains.run();
-        });
-        videos.addView(Ui.text(this, "Video downloads need the optional MiddleShare Video add-on. Install it once from Releases; images need no add-on.", 14, Ui.MUTED, false));
-        Button releases = new Button(this);
-        releases.setText(R.string.video_releases);
-        releases.setAllCaps(false);
-        releases.setOnClickListener(v -> VideoAddon.releases(this));
-        videos.addView(releases);
-        Ui.gap(this, page, 24);
-        Button pick = new Button(this);
-        pick.setText(R.string.try_image);
-        pick.setAllCaps(false);
-        pick.setMinHeight(Ui.dp(this, 52));
-        pick.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*")
-                    .addCategory(Intent.CATEGORY_OPENABLE);
-            try { startActivityForResult(intent, 10); }
-            catch (android.content.ActivityNotFoundException e) {
-                new android.app.AlertDialog.Builder(this).setMessage("No image picker is available on this device.")
-                        .setPositiveButton("OK", null).show();
-            }
-        });
-        page.addView(pick, new LinearLayout.LayoutParams(-1, -2));
-        Ui.gap(this, page, 24);
-        page.addView(Ui.text(this, "FROM ANY APP", 11, Ui.GREEN, true));
-        Ui.gap(this, page, 12);
-        page.addView(Ui.text(this, "1   Share an image or video link to MiddleShare.\n2   We convert the image or download the video.\n3   Choose where to send the file.", 16, Ui.INK, false));
-        Ui.gap(this, page, 24);
-        page.addView(Ui.text(this, "Images stay on your device. Video links contact the source site using yt-dlp. No account or broad storage permission is needed. Animated WebP becomes a still image.", 13, Ui.MUTED, false));
-        Ui.gap(this, page, 24);
-        Button about = new Button(this);
+        dialog.show();
+    }
+    private void addAbout(LinearLayout page) {
+        Button about = Ui.button(this, R.string.about_button, false);
         about.setId(R.id.about_button);
-        about.setText(R.string.about_button);
-        about.setAllCaps(false);
         about.setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
+        Ui.gap(this, page, 8);
         page.addView(about, new LinearLayout.LayoutParams(-1, -2));
     }
-    private void showVideoAddon() {
-        LinearLayout page = Ui.screen(this);
-        page.addView(Ui.text(this, "MiddleShare Video", 30, Ui.INK, true));
-        Ui.gap(this, page, 20);
-        page.addView(Ui.text(this, "Video tools are installed. Share a video link to the main MiddleShare app to download it and open the share sheet. Keep both apps installed. Images use only the lightweight main app.", 16, Ui.MUTED, false));
-        Button about = new Button(this);
-        about.setId(R.id.about_button);
-        about.setText(R.string.about_button);
-        about.setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
-        page.addView(about);
+    private void showVideoAddon(LinearLayout page) {
+        LinearLayout card = Ui.card(this, page);
+        Ui.heading(this, card, "Ready for video", "Your video tools are installed.");
+        card.addView(Ui.text(this, "Share a video link to the main MiddleShare app to download it and choose a destination. Keep both apps installed.", 16, Ui.MUTED, false));
+        addAbout(page);
     }
     private RadioButton option(String label, int id) {
         RadioButton button = new RadioButton(this);
         button.setId(id);
         button.setText(label);
-        button.setTextSize(14);
-        button.setTextColor(getColor(Ui.INK));
-        button.setPadding(0, Ui.dp(this, 10), 0, Ui.dp(this, 10));
-        button.setMinHeight(Ui.dp(this, 64));
+        Ui.choice(this, button);
         return button;
     }
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {

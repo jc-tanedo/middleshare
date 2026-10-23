@@ -1,8 +1,16 @@
 <resources>
-    <color name="background">#101815</color>
-    <color name="surface">#1C2823</color>
-    <color name="ink">#E4EEE8</color>
-    <color name="muted">#A7BAB0</color>
-    <color name="accent">#86D8B6</color>
+    <color name="background">#2E3440</color>
+    <color name="surface">#3B4252</color>
+    <color name="surface_variant">#434C5E</color>
+    <color name="ink">#ECEFF4</color>
+    <color name="muted">#D0D7E2</color>
+    <color name="accent">#88C0D0</color>
+    <color name="on_accent">#25343F</color>
+    <color name="accent_container">#46596B</color>
+    <color name="on_accent_container">#ECEFF4</color>
+    <color name="outline">#626F85</color>
+    <color name="ripple">#3388C0D0</color>
+    <color name="disabled">#434C5E</color>
+    <color name="on_disabled">#B2BDCD</color>
     <bool name="light_system_bars">false</bool>
 </resources>

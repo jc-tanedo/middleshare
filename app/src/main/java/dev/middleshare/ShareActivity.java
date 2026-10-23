@@ -29,9 +29,10 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
         page = Ui.screen(this);
         page.setMinimumWidth(Ui.dp(this, 320));
         page.setMinimumHeight(Ui.dp(this, 260));
-        page.addView(Ui.text(this, "MIDDLESHARE", 12, Ui.GREEN, true));
-        Ui.gap(this, page, 48);
-        progress = Ui.text(this, "Preparing your share…", 30, Ui.INK, true);
+        Ui.handle(this, page);
+        page.addView(Ui.text(this, "MiddleShare", 14, Ui.GREEN, true));
+        Ui.gap(this, page, 16);
+        progress = Ui.text(this, "Preparing your share…", 26, Ui.INK, true);
         progress.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
         page.addView(progress);
         Ui.gap(this, page, 20);
@@ -43,11 +44,11 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
         page.addView(spinner, spinnerParams);
         Ui.gap(this, page, 20);
         page.addView(Ui.text(this, "Your share sheet opens when the file is ready. Images convert locally; video links download from the source site.", 16, Ui.MUTED, false));
-        Button cancel = new Button(this);
+        Button cancel = Ui.button(this, R.string.cancel, false);
         cancel.setText(R.string.cancel);
         cancel.setAllCaps(false);
         cancel.setOnClickListener(v -> finish());
-        page.addView(cancel);
+        page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
         if (state != null && state.getBoolean("dispatched")) { finish(); return; }
         Object retained = getLastNonConfigurationInstance();
         if (retained instanceof ConversionJob) {
@@ -85,7 +86,7 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
         page.removeAllViews();
         page.addView(Ui.text(this, "Video add-on needed", 28, Ui.INK, true));
         page.addView(Ui.text(this, "Install MiddleShare Video, then return here to continue sharing your link.", 16, Ui.MUTED, false));
-        Button retry = new Button(this);
+        Button retry = Ui.button(this, R.string.try_again, true);
         retry.setId(R.id.video_retry);
         retry.setText(R.string.try_again);
         retry.setOnClickListener(v -> handOffVideo());
@@ -128,11 +129,11 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
         Ui.gap(this, page, 16);
         page.addView(Ui.text(this, message, 16, Ui.MUTED, false));
         Ui.gap(this, page, 24);
-        Button close = new Button(this);
+        Button close = Ui.button(this, R.string.close, false);
         close.setText(R.string.close);
         close.setAllCaps(false);
         close.setOnClickListener(v -> finish());
-        page.addView(close);
+        page.addView(close, new LinearLayout.LayoutParams(-1, -2));
     }
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -17,7 +17,9 @@ The main app accepts only an enabled add-on with the expected package, supported
 
 - **Images:** Share an image attachment → MiddleShare → your destination app. JPEG is the default (quality 92, white background for transparency); select PNG in settings to preserve transparency. Other supported image formats pass through byte-for-byte. Batches support up to 20 images.
 - **Video links:** Share one HTTP/HTTPS link as text → MiddleShare → wait for the download → choose the receiving app. Captions containing one link work. Image attachments take precedence over caption links. yt-dlp determines whether a link is supported; no separate double-fetch probe is needed.
-- **Appearance:** Uses the device theme by default, including automatic light/dark changes. Choose **Light** or **Dark** to override it.
+- **Appearance:** Uses the device theme by default, including automatic light/dark changes. Dark uses a Nord-inspired slate and frost palette; Light keeps the softer neutral palette. Choose **Light** or **Dark** to override it.
+- **Settings:** Image, Video, and Appearance cards group the defaults. **Site preferences** opens a list where you can add, edit, or remove host overrides. The shared button and selection styles use native Android views, with no added UI dependency.
+- **Icon:** Original share-node M artwork, with a dotted split, adaptive launcher masks, and Android 13+ monochrome themed-icon support.
 - **Try an image:** The home screen can open the system document picker.
 
 The optional video add-on contains yt-dlp with Python, QuickJS, and FFmpeg. The main APK contains none of these runtimes. The tools initialize only for video links. Best leaves format selection to yt-dlp. Mobile and Standard cap the resolution at 480p and 1080p; Full has no resolution cap. Separate streams are merged without re-encoding. WebM or MKV may be used when an MP4-compatible source is unavailable. No conversion server is used. Link downloads contact the original site and consume your internet connection; image conversion stays local.

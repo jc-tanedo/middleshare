@@ -34,7 +34,7 @@ public final class AboutActivity extends Activity {
         list.setDividerHeight(0);
         list.setPadding(Ui.dp(this, 12), 0, Ui.dp(this, 12), Ui.dp(this, 24));
         Ui.installScreen(this, list);
-        Button back = new Button(this);
+        Button back = Ui.button(this, R.string.back, false);
         back.setText(R.string.back);
         back.setAllCaps(false);
         back.setOnClickListener(v -> finish());
@@ -47,12 +47,13 @@ public final class AboutActivity extends Activity {
         page.addView(Ui.text(this, getString(R.string.app_version, version), 15, Ui.MUTED, false));
         Ui.gap(this, page, 12);
         page.addView(Ui.text(this, getString(R.string.about_intro), 15, Ui.MUTED, false));
-        Button projectLicense = new Button(this);
+        Button projectLicense = Ui.button(this, R.string.app_license, false);
         projectLicense.setText(R.string.app_license);
         projectLicense.setAllCaps(false);
         projectLicense.setOnClickListener(v -> showLicenses(getString(R.string.app_name), new JSONArray().put("licenses/MiddleShare.txt")));
         page.addView(projectLicense);
-        Button projectSource = new Button(this);
+        Ui.gap(this, page, 8);
+        Button projectSource = Ui.button(this, R.string.project_source, false);
         projectSource.setText(R.string.project_source);
         projectSource.setAllCaps(false);
         projectSource.setOnClickListener(v -> openSource("https://github.com/jc-tanedo/middleshare"));

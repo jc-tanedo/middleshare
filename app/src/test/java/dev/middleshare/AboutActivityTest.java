@@ -75,7 +75,7 @@ public class AboutActivityTest {
     @Test @Config(qualifiers = "notnight") public void aboutHonorsExplicitDarkTheme() {
         Settings.setTheme(RuntimeEnvironment.getApplication(), Settings.Theme.DARK);
         var controller = Robolectric.buildActivity(AboutActivity.class).setup();
-        try { assertEquals(0xff101815, controller.get().getColor(R.color.background)); }
+        try { assertEquals(0xff2e3440, controller.get().getColor(R.color.background)); }
         finally { controller.pause().stop().destroy(); }
     }
 }
