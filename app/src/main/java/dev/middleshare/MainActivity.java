@@ -15,6 +15,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
+        if (BuildConfig.VIDEO_TOOLS) { showVideoAddon(); return; }
         LinearLayout page = Ui.screen(this);
         page.addView(Ui.text(this, "MIDDLESHARE  /  SHARE TOOLS", 12, Ui.GREEN, true));
         Ui.gap(this, page, 24);
@@ -73,6 +74,12 @@ public final class MainActivity extends Activity {
         videos.addView(Ui.text(this, "VIDEO LINKS  /  YT-DLP", 11, Ui.GREEN, true));
         Ui.gap(this, videos, 12);
         videos.addView(Ui.text(this, "Share a supported link to download one video, then send it to another app. MP4 is preferred, up to 1080p. Downloads use your internet connection and can be cancelled.", 14, Ui.MUTED, false));
+        videos.addView(Ui.text(this, "Video downloads need the optional MiddleShare Video add-on. Install it once from Releases; images need no add-on.", 14, Ui.MUTED, false));
+        Button releases = new Button(this);
+        releases.setText(R.string.video_releases);
+        releases.setAllCaps(false);
+        releases.setOnClickListener(v -> VideoAddon.releases(this));
+        videos.addView(releases);
         Ui.gap(this, page, 24);
         Button pick = new Button(this);
         pick.setText(R.string.try_image);
@@ -101,6 +108,17 @@ public final class MainActivity extends Activity {
         about.setAllCaps(false);
         about.setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
         page.addView(about, new LinearLayout.LayoutParams(-1, -2));
+    }
+    private void showVideoAddon() {
+        LinearLayout page = Ui.screen(this);
+        page.addView(Ui.text(this, "MiddleShare Video", 30, Ui.INK, true));
+        Ui.gap(this, page, 20);
+        page.addView(Ui.text(this, "Video tools are installed. Share a video link to the main MiddleShare app to download it and open the share sheet. Keep both apps installed. Images use only the lightweight main app.", 16, Ui.MUTED, false));
+        Button about = new Button(this);
+        about.setId(R.id.about_button);
+        about.setText(R.string.about_button);
+        about.setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
+        page.addView(about);
     }
     private RadioButton option(String label, int id) {
         RadioButton button = new RadioButton(this);

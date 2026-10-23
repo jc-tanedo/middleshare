@@ -13,7 +13,7 @@ def sha256 = { File file ->
 }
 def runtimeArtifacts = {
     def byId = [:]
-    ['debugRuntimeClasspath', 'releaseRuntimeClasspath'].each { name ->
+    ['coreDebugRuntimeClasspath', 'coreReleaseRuntimeClasspath', 'videoDebugRuntimeClasspath', 'videoReleaseRuntimeClasspath'].each { name ->
         def configuration = configurations.getByName(name)
         configuration.incoming.artifacts.artifacts.each { artifact ->
             if (!(artifact.id.componentIdentifier instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier)) {
@@ -40,9 +40,9 @@ tasks.register('exportThirdPartyArtifacts') {
 tasks.register('verifyThirdPartyCredits') {
     group = 'verification'
     description = 'Prevents dependency or vendored-code changes from shipping with stale About credits.'
-    inputs.files(configurations.named('debugRuntimeClasspath'), configurations.named('releaseRuntimeClasspath'))
+    inputs.files(['coreDebugRuntimeClasspath', 'coreReleaseRuntimeClasspath', 'videoDebugRuntimeClasspath', 'videoReleaseRuntimeClasspath'].collect { configurations.named(it) })
     inputs.file('src/main/assets/third_party.json')
-    inputs.file('src/main/res/raw/ytdlp')
+    inputs.file('src/video/res/raw/ytdlp')
     inputs.file(rootProject.file('scripts/update_credits.py'))
     inputs.files(fileTree('src/main/assets/licenses'), rootProject.fileTree('third_party'))
     doLast {

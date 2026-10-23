@@ -2,6 +2,17 @@
 
 Native Android share middleware: convert WebP images or download a video from a supported link, then open Android’s share sheet with the resulting file. Android 9+.
 
+## Install
+
+Download APKs from [Releases](https://github.com/jc-tanedo/middleshare/releases/latest):
+
+- **Main app:** `middleshare-VERSION.apk` — lightweight image conversion, no video runtime or internet permission.
+- **Optional video add-on:** `middleshare-video-VERSION-arm64-v8a.apk` for most phones. ARMv7 and x86_64 builds are also available; universal supports all three architectures at a much larger download size. Keep the main app installed.
+
+Install the add-on only if you need video downloads. Sharing a video link without it offers **Open Releases**. After installing the add-on, return to the pending share and tap **Try again**. Future video shares use the installed add-on automatically. No runtime files are downloaded silently. The add-on remains installed across app restarts, but may need updates when sites change.
+
+The main app accepts only an enabled add-on with the expected package, supported version, and matching signing certificate. Use both APKs from the same release. Releases from this private repository become accessible to everyone once it is public. See [RELEASING.md](RELEASING.md) for automated tagged releases and one-time signing setup.
+
 ## Use
 
 - **Images:** Share an image attachment → MiddleShare → your destination app. JPEG is the default (quality 92, white background for transparency); select PNG in settings to preserve transparency. Other supported image formats pass through byte-for-byte. Batches support up to 20 images.
@@ -9,7 +20,7 @@ Native Android share middleware: convert WebP images or download a video from a 
 - **Appearance:** Uses the device theme by default, including automatic light/dark changes. Choose **Light** or **Dark** to override it.
 - **Try an image:** The home screen can open the system document picker.
 
-Videos use yt-dlp with Python, QuickJS, and FFmpeg bundled on-device. The tools initialize only for video links. MP4/H.264/AAC and resolutions at or below 1080p are preferred; separate streams are merged without re-encoding. WebM or MKV may be used when an MP4-compatible source is unavailable. No conversion server is used. Link downloads contact the original site and consume your internet connection; image conversion stays local.
+The optional video add-on contains yt-dlp with Python, QuickJS, and FFmpeg. The main APK contains none of these runtimes. The tools initialize only for video links. MP4/H.264/AAC and resolutions at or below 1080p are preferred; separate streams are merged without re-encoding. WebM or MKV may be used when an MP4-compatible source is unavailable. No conversion server is used. Link downloads contact the original site and consume your internet connection; image conversion stays local.
 
 ## Download behavior
 
@@ -29,21 +40,23 @@ Some links require sign-in or site-specific access, or may stop working when a s
 Use Android Studio or a full JDK 17/21, Android SDK platform 35, build-tools 35.0.0, and platform-tools. Set `ANDROID_HOME`, or `sdk.dir` in ignored `local.properties`.
 
 ```sh
-./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
-adb install -r app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
+adb install -r app/build/outputs/apk/core/debug/app-core-universal-debug.apk
+# Optional; both debug APKs must come from the same build:
+adb install -r app/build/outputs/apk/video/debug/app-video-arm64-v8a-debug.apk
 ```
 
-The Gradle wrapper pins and verifies Gradle 8.11.1. Builds produce ARM64, ARMv7, x86_64, and universal APKs. Use `app-universal-debug.apk` if unsure of your device architecture. Debug builds use the existing development signing key so they can update v0.1. Release APKs are optimized and unsigned; use your own signing key for distribution.
+The Gradle wrapper pins and verifies Gradle 8.11.1. The `core` flavor keeps the original `dev.middleshare` package; `video` uses `dev.middleshare.video` and includes the heavy native dependencies. Each flavor produces ARM64, ARMv7, x86_64, and universal APKs; all core APKs contain the same architecture-independent code, so distribution uses its universal APK. Debug builds from one run share a development signing key. Local release APKs are optimized and unsigned unless signing environment variables are supplied. Tagged CI releases use persistent signing secrets; see RELEASING.md.
 
-The image/UI implementation remains Java with framework views and native image codecs. Video support adds the youtubedl-android and FFmpeg libraries, so APKs are substantially larger than the image-only release. ABI-specific packages reduce download size. The bundled extractor is SHA-256 checked before use, including when replacing an older extracted copy. TLS verification remains enabled.
+The image/UI implementation remains Java with framework views and native image codecs. Only the video flavor adds the youtubedl-android and FFmpeg libraries. The core dependency graph contains no third-party runtime libraries. ABI-specific add-on packages reduce download size. The bundled extractor is SHA-256 checked before use, including when replacing an older extracted copy. TLS verification remains enabled.
 
-Tests cover native image codecs on Android 14, Android 15 intent handling, device/default/override themes, link parsing, output MIME/URI permissions, download request policy, cancellation, partial cleanup, size limits, storage preflight, and bundled extractor integrity. The downloader engine and Android storage service are replaced with fixtures in JVM tests; these tests do not establish that live sites or Android native subprocesses work. Use the emulator/device smoke test for integration checks.
+Tests cover add-on signature/version checks, missing-add-on prompts and retry, native image codecs on Android 14, Android 15 intent handling, device/default/override themes, link parsing, output MIME/URI permissions, download request policy, cancellation, partial cleanup, size limits, storage preflight, and bundled extractor integrity. The downloader engine and Android storage service are replaced with fixtures in JVM tests; these tests do not establish that live sites or Android native subprocesses work. Use the emulator/device smoke test for integration checks.
 
 ## Device smoke test
 
 1. Toggle device light/dark mode while **Use device theme** is selected; check settings, buttons, processing and error screens, dialogs, and system bars. Test explicit Light/Dark overrides.
 2. Share a transparent WebP → MiddleShare → a messaging app. Check JPEG white background; repeat with PNG transparency.
-3. Share a public video link (e.g. YouTube, Vimeo, or a direct MP4) → MiddleShare → a video-capable receiving app. Check video playback and audio.
+3. Install the matching video add-on, then share a public video link (e.g. YouTube, Vimeo, or a direct MP4) → MiddleShare → a video-capable receiving app. Check video playback and audio.
 4. Rotate during download; confirm the job continues and only one chooser appears. Cancel an active download; confirm no partial output is shared.
 5. Try an unsupported URL, an unavailable video, and a source requiring sign-in. Check that errors return control to the user.
 6. Test an image batch, Android 9, a recent Android version, large text, and gesture navigation.
@@ -55,16 +68,16 @@ Use the existing `/workspace/middleshare` checkout. Tasks are already isolated; 
 ```sh
 source /workspace/tools/middleshare-env.sh
 cd /workspace/middleshare
-./gradlew -I /workspace/tools/android-test.init.gradle testDebugUnitTest lintDebug assembleDebug assembleRelease
+./gradlew -I /workspace/tools/android-test.init.gradle testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
 ```
 
 The retained SDK, JDK, Gradle cache, proxy, system CA trust, and writable Robolectric cache are configured outside the checkout. No development server is needed. An optional Android 15 x86_64 AVD named `middleshare-api35` is available under `/workspace/android-avd` for native integration checks; it uses software emulation when hardware acceleration is unavailable.
 
 ## About and open-source credits
 
-Open **About & open-source licenses** from the home screen. The page follows the selected theme, lists runtime libraries and bundled code, and provides offline license/copyright notices plus upstream source links. Build/test tools are identified separately from software included in the app.
+Open **About & open-source licenses** from either app’s home screen. Both apps include offline notices; video dependencies are explicitly marked **Optional video add-on** and are not claimed to be bundled in the core APK. The page follows the selected theme, lists runtime libraries and bundled code, and provides offline license/copyright notices plus upstream source links. Build/test tools are identified separately from software included in the app.
 
-The checked-in catalog at `app/src/main/assets/third_party.json` includes the complete resolved Android dependency set and the Python, FFmpeg, codec, certificate, and JavaScript components found inside the shipped runtime bundles. Exact versions are shown where verified; otherwise entries identify the wrapper bundle they came from.
+The checked-in catalog at `app/src/main/assets/third_party.json` includes the union of both flavors’ resolved Android dependency sets and the Python, FFmpeg, codec, certificate, and JavaScript components found inside the shipped runtime bundles. Exact versions are shown where verified; otherwise entries identify the wrapper bundle they came from.
 
 Before adding or updating third-party code:
 

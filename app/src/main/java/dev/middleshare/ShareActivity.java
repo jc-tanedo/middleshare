@@ -15,6 +15,7 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
     private TextView progress;
     private LinearLayout page;
     private boolean showingError;
+    private String pendingLink;
 
     @Override protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(Ui.themedContext(base));
@@ -43,11 +44,34 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
         } else {
             try {
                 String link = SharedLink.read(getIntent());
+                if (link != null && !BuildConfig.VIDEO_TOOLS) {
+                    pendingLink = link;
+                    handOffVideo();
+                    return;
+                }
                 job = link != null ? new ConversionJob(getApplicationContext(), link)
                         : new ConversionJob(getApplicationContext(), ShareIntents.read(getIntent()), Settings.getFormat(this));
             } catch (IOException e) { showError(e.getMessage()); }
             catch (RuntimeException e) { showError("The shared payload is invalid. Please try sharing the image or video link again."); }
         }
+    }
+    private void handOffVideo() {
+        if (VideoAddon.available(this)) {
+            try {
+                startActivity(VideoAddon.share(pendingLink));
+                finish();
+                return;
+            } catch (ActivityNotFoundException | SecurityException ignored) { /* Offer reinstall. */ }
+        }
+        page.removeAllViews();
+        page.addView(Ui.text(this, "Video add-on needed", 28, Ui.INK, true));
+        page.addView(Ui.text(this, "Install MiddleShare Video, then return here to continue sharing your link.", 16, Ui.MUTED, false));
+        Button retry = new Button(this);
+        retry.setId(R.id.video_retry);
+        retry.setText(R.string.try_again);
+        retry.setOnClickListener(v -> handOffVideo());
+        page.addView(retry);
+        VideoAddon.prompt(this, this::handOffVideo);
     }
     @Override protected void onResume() { super.onResume(); if (job != null) job.attach(this); }
     @Override protected void onPause() { if (job != null) job.detach(); super.onPause(); }

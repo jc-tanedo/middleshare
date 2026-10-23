@@ -98,7 +98,7 @@ for artifact in artifacts:
         with zipfile.ZipFile(path) as aar:
             if 'classes.jar' in aar.namelist(): license_assets += embedded_notices(aar.read('classes.jar'), artifact['id'] + ':classes')
     records.append(dict(id=artifact['id'], name=info['name'], version=artifact['id'].split(':')[-1],
-                        category='Android libraries', license='; '.join(name for name, _ in info['licenses']),
+                        category='Optional video add-on · Android libraries', license='; '.join(name for name, _ in info['licenses']),
                         source=info['source'], licenseUrls=[url for _, url in info['licenses'] if url],
                         noticeAssets=sorted(set(license_assets))))
 
@@ -153,11 +153,11 @@ for key, names in files.items():
     if not names: raise ValueError(f'Attribution registry entry no longer matches shipped files: {key}')
     entry = registry[key]
     records.append(dict(id='native:' + key, name=entry['name'], version=entry['version'],
-                        category='Bundled runtimes and codecs', license=entry['license'], source=entry['source'],
+                        category='Optional video add-on · runtimes and codecs', license=entry['license'], source=entry['source'],
                         licenseUrls=[entry.get('licenseSource') or entry['metadataSource']],
                         noticeAssets=entry['noticeAssets'], files=sorted(set(names))))
 
-payload = ROOT / 'app/src/main/res/raw/ytdlp'
+payload = ROOT / 'app/src/video/res/raw/ytdlp'
 with zipfile.ZipFile(payload) as archive:
     roots = {name.split('/')[0] for name in archive.namelist() if '/' in name and name.endswith('.py')}
     if roots != {'yt_dlp', 'yt_dlp_ejs'}: raise ValueError(f'Review new vendored Python code in the zipapp: {roots}')
@@ -168,16 +168,16 @@ with zipfile.ZipFile(payload) as archive:
     if not dependencies: raise ValueError('Review EJS dependency notices: no dependencies were identified')
     for name, ver, license_id, source in dependencies:
         records.append(dict(id='javascript:' + name, name=name, version=ver,
-                            category='Bundled runtimes and codecs', license=license_id,
+                            category='Optional video add-on · runtimes and codecs', license=license_id,
                             source=source.removeprefix('git+').removesuffix('.git'),
                             licenseUrls=[], noticeAssets=['licenses/ejs-third-party-notices.txt']))
     ejs = re.search(r"__version__ = version = '([^']+)'", archive.read('yt_dlp_ejs/_version.py').decode()).group(1)
-version = re.search(r'String VERSION = "([^"]+)"', (ROOT / 'app/src/main/java/dev/middleshare/BundledYtDlp.java').read_text()).group(1)
+version = re.search(r'String VERSION = "([^"]+)"', (ROOT / 'app/src/video/java/dev/middleshare/BundledYtDlp.java').read_text()).group(1)
 for key,name,ver,source in [('yt-dlp','yt-dlp',version,'https://github.com/yt-dlp/yt-dlp'),('yt-dlp-ejs','yt-dlp EJS',ejs,'https://github.com/yt-dlp/ejs')]:
-    records.append(dict(id='vendored:' + key, name=name, version=ver, category='Bundled runtimes and codecs',
+    records.append(dict(id='vendored:' + key, name=name, version=ver, category='Optional video add-on · runtimes and codecs',
                         license='Unlicense', source=source, licenseUrls=[source + '/blob/master/LICENSE'], noticeAssets=['licenses/Unlicense.txt']))
 
-vendored_files = {'app/src/main/res/raw/ytdlp': sha(payload.read_bytes())}
+vendored_files = {'app/src/video/res/raw/ytdlp': sha(payload.read_bytes())}
 for entry in json.loads((ROOT / 'third_party/additional-components.json').read_text()):
     for path in entry['files']:
         file = (ROOT / path).resolve()

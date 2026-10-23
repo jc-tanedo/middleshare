@@ -15,3 +15,5 @@ The generator audits all ABI bundles and the vendored yt-dlp zipapp. New native 
 `verifyThirdPartyCredits` runs before builds and checks exact artifact hashes, vendored payloads, registry inputs, and notices. Preserve this guard. Check the About page in both themes and keep the relevant tests and README instructions current.
 
 Cloud tasks use the existing checkout; do not create a Git worktree unless requested. Source `/workspace/tools/middleshare-env.sh` and pass `-I /workspace/tools/android-test.init.gradle` for JVM tests in this managed environment.
+
+The `core` APK must remain free of video native libraries and yt-dlp; keep those dependencies/resources in the `video` flavor. Preserve the package/version/signature checks on the add-on handoff. Validate both flavors with `testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug`. Release tags must match `versionName`; retain the persistent signing-secret workflow documented in RELEASING.md. Never commit signing keys or passwords.

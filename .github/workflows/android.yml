@@ -1,6 +1,7 @@
 name: Android
 on:
   push:
+    branches: ['**']
   pull_request:
 permissions:
   contents: read
@@ -17,9 +18,14 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
+      - run: ./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: middleshare-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: middleshare-core-debug
+          path: app/build/outputs/apk/core/debug/*universal*.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: middleshare-video-debug
+          path: app/build/outputs/apk/video/debug/*.apk
           if-no-files-found: error

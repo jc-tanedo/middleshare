@@ -3,5 +3,5 @@
 /third_party/*.json text eol=lf
 /app/src/main/assets/third_party.json text eol=lf
 /app/src/main/assets/licenses/*.txt text eol=lf
-/app/src/main/res/raw/ytdlp binary
+/app/src/video/res/raw/ytdlp binary
 /gradlew text eol=lf
