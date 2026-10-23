@@ -28,4 +28,5 @@
     <string name="saved_sites">Saved sites: %1$s</string>
     <string name="invalid_domain">Enter a valid domain, such as example.com</string>
     <string name="clear_domain_prompt">Enter the domain whose preference you want to clear</string>
+    <string name="preparing_share_file">Preparing shared file</string>
 </resources>

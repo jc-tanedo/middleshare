@@ -15,5 +15,7 @@
         <item name="android:windowBackground">@drawable/share_sheet_background</item>
         <item name="android:backgroundDimAmount">0.32</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowMinWidthMinor">320dp</item>
+        <item name="android:windowMinWidthMajor">320dp</item>
     </style>
 </resources>

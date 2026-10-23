@@ -53,6 +53,8 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
             lookup = retained.lookup; quality = retained.quality; selectedFormat = retained.selected;
         }
         LinearLayout page = Ui.screen(this);
+        page.setMinimumWidth(Ui.dp(this, 320));
+        page.setMinimumHeight(Ui.dp(this, 320));
         page.addView(Ui.text(this, "Share video", 26, Ui.INK, true));
         page.addView(Ui.text(this, host == null ? link : host, 14, Ui.MUTED, false));
         page.addView(Ui.text(this, "Choose for this share. MP4 is preferred; the 256 MB file limit still applies.", 16, Ui.MUTED, false));

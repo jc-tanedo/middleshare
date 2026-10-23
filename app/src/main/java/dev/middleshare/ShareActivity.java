@@ -27,13 +27,20 @@ public final class ShareActivity extends Activity implements ConversionJob.Liste
             getWindow().setLayout(-1, -2);
         }
         page = Ui.screen(this);
+        page.setMinimumWidth(Ui.dp(this, 320));
+        page.setMinimumHeight(Ui.dp(this, 260));
         page.addView(Ui.text(this, "MIDDLESHARE", 12, Ui.GREEN, true));
         Ui.gap(this, page, 48);
         progress = Ui.text(this, "Preparing your share…", 30, Ui.INK, true);
         progress.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
         page.addView(progress);
         Ui.gap(this, page, 20);
-        page.addView(new ProgressBar(this));
+        ProgressBar spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
+        spinner.setIndeterminate(true);
+        spinner.setContentDescription(getString(R.string.preparing_share_file));
+        LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(-2, -2);
+        spinnerParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        page.addView(spinner, spinnerParams);
         Ui.gap(this, page, 20);
         page.addView(Ui.text(this, "Your share sheet opens when the file is ready. Images convert locally; video links download from the source site.", 16, Ui.MUTED, false));
         Button cancel = new Button(this);
