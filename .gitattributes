@@ -1,0 +1,7 @@
+# Keep checksum-tracked attribution inputs identical across checkouts.
+/scripts/update_credits.py text eol=lf
+/third_party/*.json text eol=lf
+/app/src/main/assets/third_party.json text eol=lf
+/app/src/main/assets/licenses/*.txt text eol=lf
+/app/src/main/res/raw/ytdlp binary
+/gradlew text eol=lf

@@ -1,0 +1,1062 @@
+{
+  "python": {
+    "name": "CPython and standard library",
+    "version": "3.12 (video runtime 0.18.1)",
+    "license": "Python Software Foundation license and included notices",
+    "source": "https://python.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/python/build.sh",
+    "prefixes": [
+      "python3",
+      "python3.12",
+      "python"
+    ],
+    "noticeAssets": [
+      "licenses/PSF-2.0.txt",
+      "licenses/python-notices.txt"
+    ]
+  },
+  "libandroid-posix-semaphore": {
+    "name": "libandroid-posix-semaphore",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://man7.org/linux/man-pages/man7/sem_overview.7.html",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libandroid-posix-semaphore/build.sh",
+    "prefixes": [
+      "android-posix-semaphore"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "libandroid-support": {
+    "name": "libandroid-support",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Apache-2.0, MIT",
+    "source": "https://github.com/termux/libandroid-support",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libandroid-support/build.sh",
+    "prefixes": [
+      "android-support"
+    ],
+    "noticeAssets": [
+      "licenses/Apache-2.0.txt",
+      "licenses/MIT.txt"
+    ]
+  },
+  "libbz2": {
+    "name": "libbz2",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD",
+    "source": "https://sourceware.org/bzip2/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libbz2/build.sh",
+    "prefixes": [
+      "bz2"
+    ],
+    "noticeAssets": [
+      "licenses/bzip2-1.0.6.txt"
+    ]
+  },
+  "libc++": {
+    "name": "libc++",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Apache-2.0 with LLVM exceptions; MIT/NCSA notices",
+    "source": "https://libcxx.llvm.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libc++/build.sh",
+    "prefixes": [
+      "c++_shared"
+    ],
+    "noticeAssets": [
+      "licenses/llvm-libcxx-notices.txt",
+      "licenses/NCSA.txt"
+    ],
+    "licenseSource": "https://raw.githubusercontent.com/llvm/llvm-project/release/19.x/libcxx/LICENSE.TXT"
+  },
+  "libcrypt": {
+    "name": "libcrypt",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://michael.dipperstein.com/crypt/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libcrypt/build.sh",
+    "prefixes": [
+      "crypt"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "openssl": {
+    "name": "openssl",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Apache-2.0",
+    "source": "https://www.openssl.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/openssl/build.sh",
+    "prefixes": [
+      "crypto",
+      "ssl"
+    ],
+    "noticeAssets": [
+      "licenses/Apache-2.0.txt"
+    ]
+  },
+  "libexpat": {
+    "name": "libexpat",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://libexpat.github.io/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libexpat/build.sh",
+    "prefixes": [
+      "expat"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "libffi": {
+    "name": "libffi",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://sourceware.org/libffi/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libffi/build.sh",
+    "prefixes": [
+      "ffi"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "ncurses": {
+    "name": "ncurses",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://invisible-island.net/ncurses/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/ncurses/build.sh",
+    "prefixes": [
+      "curses",
+      "form",
+      "formw",
+      "menu",
+      "menuw",
+      "ncurses",
+      "ncursesw",
+      "panel",
+      "panelw",
+      "termcap",
+      "tic",
+      "tinfo"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "gdbm": {
+    "name": "gdbm",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-3.0",
+    "source": "https://www.gnu.org.ua/software/gdbm/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/gdbm/build.sh",
+    "prefixes": [
+      "gdbm",
+      "gdbm_compat"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "liblzma": {
+    "name": "liblzma",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1, GPL-2.0, GPL-3.0",
+    "source": "https://tukaani.org/xz/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/liblzma/build.sh",
+    "prefixes": [
+      "lzma"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt",
+      "licenses/GPL-2.0-only.txt",
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "readline": {
+    "name": "readline",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-3.0",
+    "source": "https://tiswww.case.edu/php/chet/readline/rltop.html",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/readline/build.sh",
+    "prefixes": [
+      "readline",
+      "history"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "libsqlite": {
+    "name": "libsqlite",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Public Domain",
+    "source": "https://www.sqlite.org",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libsqlite/build.sh",
+    "prefixes": [
+      "sqlite3"
+    ],
+    "noticeAssets": [
+      "licenses/sqlite-notices.txt"
+    ]
+  },
+  "zlib": {
+    "name": "zlib",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "ZLIB",
+    "source": "https://www.zlib.net/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/zlib/build.sh",
+    "prefixes": [
+      "z"
+    ],
+    "noticeAssets": [
+      "licenses/Zlib.txt"
+    ]
+  },
+  "ocl-icd": {
+    "name": "ocl-icd",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://github.com/OCL-dev/ocl-icd",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/ocl-icd/build.sh",
+    "prefixes": [
+      "OpenCL"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "libandroid-stub": {
+    "name": "libandroid-stub",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "NCSA",
+    "source": "https://android.googlesource.com/platform/frameworks/base/+/main/native/android",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libandroid-stub/build.sh",
+    "prefixes": [
+      "android",
+      "OpenSLES",
+      "mediandk"
+    ],
+    "noticeAssets": [
+      "licenses/NCSA.txt"
+    ]
+  },
+  "svt-av1": {
+    "name": "svt-av1",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD-3-Clause-Clear and patent license",
+    "source": "https://gitlab.com/AOMediaCodec/SVT-AV1",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/svt-av1/build.sh",
+    "prefixes": [
+      "SvtAv1Enc"
+    ],
+    "noticeAssets": [
+      "licenses/svt-av1-notices.txt",
+      "licenses/svt-av1-patents.txt"
+    ]
+  },
+  "libandroid-glob": {
+    "name": "libandroid-glob",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://man7.org/linux/man-pages/man3/glob.3.html",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libandroid-glob/build.sh",
+    "prefixes": [
+      "android-glob"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libaom": {
+    "name": "libaom",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://aomedia.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libaom/build.sh",
+    "prefixes": [
+      "aom"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "libass": {
+    "name": "libass",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "ISC",
+    "source": "https://github.com/libass/libass",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libass/build.sh",
+    "prefixes": [
+      "ass"
+    ],
+    "noticeAssets": [
+      "licenses/libass-notices.txt"
+    ]
+  },
+  "ffmpeg": {
+    "name": "ffmpeg",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-3.0",
+    "source": "https://ffmpeg.org",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/ffmpeg/build.sh",
+    "prefixes": [
+      "avcodec",
+      "avdevice",
+      "avfilter",
+      "avformat",
+      "avutil",
+      "postproc",
+      "swresample",
+      "swscale",
+      "ffmpeg",
+      "ffprobe"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "libbluray": {
+    "name": "libbluray",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://code.videolan.org/videolan/libbluray/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libbluray/build.sh",
+    "prefixes": [
+      "bluray"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "brotli": {
+    "name": "brotli",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://github.com/google/brotli",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/brotli/build.sh",
+    "prefixes": [
+      "brotlicommon",
+      "brotlidec",
+      "brotlienc"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "libiconv": {
+    "name": "libiconv",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1, GPL-3.0",
+    "source": "https://www.gnu.org/software/libiconv/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libiconv/build.sh",
+    "prefixes": [
+      "charset",
+      "iconv"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt",
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "libdav1d": {
+    "name": "libdav1d",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://code.videolan.org/videolan/dav1d/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libdav1d/build.sh",
+    "prefixes": [
+      "dav1d"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "fftw": {
+    "name": "fftw",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://www.fftw.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/fftw/build.sh",
+    "prefixes": [
+      "fftw3",
+      "fftw3_threads",
+      "fftw3f",
+      "fftw3f_threads",
+      "fftw3l",
+      "fftw3l_threads"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "fontconfig": {
+    "name": "fontconfig",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://www.freedesktop.org/wiki/Software/fontconfig/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/fontconfig/build.sh",
+    "prefixes": [
+      "fontconfig"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "freetype": {
+    "name": "freetype",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://www.freetype.org",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/freetype/build.sh",
+    "prefixes": [
+      "freetype"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "fribidi": {
+    "name": "fribidi",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.0",
+    "source": "https://github.com/fribidi/fribidi/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/fribidi/build.sh",
+    "prefixes": [
+      "fribidi"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.0-only.txt"
+    ]
+  },
+  "glib": {
+    "name": "glib",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://developer.gnome.org/glib/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/glib/build.sh",
+    "prefixes": [
+      "gio-2.0",
+      "girepository-2.0",
+      "glib-2.0",
+      "gmodule-2.0",
+      "gobject-2.0",
+      "gthread-2.0"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "game-music-emu": {
+    "name": "game-music-emu",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://bitbucket.org/mpyne/game-music-emu/wiki/Home",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/game-music-emu/build.sh",
+    "prefixes": [
+      "gme"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "libgmp": {
+    "name": "libgmp",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-3.0",
+    "source": "https://gmplib.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libgmp/build.sh",
+    "prefixes": [
+      "gmp",
+      "gmpxx"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-3.0-only.txt"
+    ]
+  },
+  "gnutls": {
+    "prefixes": [
+      "gnutls-dane",
+      "gnutls",
+      "gnutlsxx"
+    ],
+    "name": "libgnutls",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1, GPL-3.0",
+    "source": "https://www.gnutls.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libgnutls/build.sh",
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt",
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "libgraphite": {
+    "name": "libgraphite",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.0",
+    "source": "https://github.com/silnrsi/graphite",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libgraphite/build.sh",
+    "prefixes": [
+      "graphite2"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.0-only.txt"
+    ]
+  },
+  "harfbuzz": {
+    "name": "harfbuzz",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://www.freedesktop.org/wiki/Software/HarfBuzz/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/harfbuzz/build.sh",
+    "prefixes": [
+      "harfbuzz",
+      "harfbuzz-cairo",
+      "harfbuzz-gobject",
+      "harfbuzz-subset"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "nettle": {
+    "prefixes": [
+      "hogweed",
+      "nettle"
+    ],
+    "name": "libnettle",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0, LGPL-3.0",
+    "source": "https://www.lysator.liu.se/~nisse/nettle/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libnettle/build.sh",
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt",
+      "licenses/LGPL-3.0-only.txt"
+    ]
+  },
+  "libidn2": {
+    "name": "libidn2",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-3.0, GPL-2.0, GPL-3.0",
+    "source": "https://www.gnu.org/software/libidn/#libidn2",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libidn2/build.sh",
+    "prefixes": [
+      "idn2"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-3.0-only.txt",
+      "licenses/GPL-2.0-only.txt",
+      "licenses/GPL-3.0-only.txt"
+    ]
+  },
+  "littlecms": {
+    "name": "littlecms",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://www.littlecms.com/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/littlecms/build.sh",
+    "prefixes": [
+      "lcms2"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "libmp3lame": {
+    "name": "libmp3lame",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.0",
+    "source": "https://lame.sourceforge.io/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libmp3lame/build.sh",
+    "prefixes": [
+      "mp3lame"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.0-only.txt"
+    ]
+  },
+  "mpg123": {
+    "prefixes": [
+      "mpg123",
+      "out123",
+      "syn123"
+    ],
+    "name": "libmpg123",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://mpg123.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libmpg123/build.sh",
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "libogg": {
+    "name": "libogg",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://xiph.org/ogg/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libogg/build.sh",
+    "prefixes": [
+      "ogg"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libopencore-amr": {
+    "name": "libopencore-amr",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Apache-2.0",
+    "source": "https://sourceforge.net/projects/opencore-amr/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libopencore-amr/build.sh",
+    "prefixes": [
+      "opencore-amrnb",
+      "opencore-amrwb"
+    ],
+    "noticeAssets": [
+      "licenses/Apache-2.0.txt"
+    ]
+  },
+  "libopenmpt": {
+    "name": "libopenmpt",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://lib.openmpt.org/libopenmpt/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libopenmpt/build.sh",
+    "prefixes": [
+      "openmpt"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libopus": {
+    "name": "libopus",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://www.opus-codec.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libopus/build.sh",
+    "prefixes": [
+      "opus"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "pcre2": {
+    "name": "pcre2",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://pcre2project.github.io/pcre2/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/pcre2/build.sh",
+    "prefixes": [
+      "pcre2-16",
+      "pcre2-32",
+      "pcre2-8",
+      "pcre2-posix"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libpng": {
+    "name": "libpng",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Libpng",
+    "source": "https://www.libpng.org/pub/png/libpng.html",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libpng/build.sh",
+    "prefixes": [
+      "png",
+      "png16"
+    ],
+    "noticeAssets": [
+      "licenses/Libpng.txt"
+    ]
+  },
+  "librav1e": {
+    "name": "librav1e",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://github.com/xiph/rav1e/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/librav1e/build.sh",
+    "prefixes": [
+      "rav1e"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "rubberband": {
+    "name": "rubberband",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://breakfastquay.com/rubberband/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/rubberband/build.sh",
+    "prefixes": [
+      "rubberband",
+      "rubberband-jni"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libsamplerate": {
+    "name": "libsamplerate",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 2-Clause",
+    "source": "https://libsndfile.github.io/libsamplerate/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libsamplerate/build.sh",
+    "prefixes": [
+      "samplerate"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "libwebp": {
+    "name": "libwebp",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://github.com/webmproject/libwebp",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libwebp/build.sh",
+    "prefixes": [
+      "sharpyuv",
+      "webp",
+      "webpdecoder",
+      "webpdemux",
+      "webpmux"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libsodium": {
+    "name": "libsodium",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "ISC",
+    "source": "https://libsodium.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libsodium/build.sh",
+    "prefixes": [
+      "sodium"
+    ],
+    "noticeAssets": [
+      "licenses/ISC.txt"
+    ]
+  },
+  "libsoxr": {
+    "name": "libsoxr",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://sourceforge.net/projects/soxr/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libsoxr/build.sh",
+    "prefixes": [
+      "soxr-lsr",
+      "soxr"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "libsrt": {
+    "name": "libsrt",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MPL-2.0",
+    "source": "https://github.com/Haivision/srt",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libsrt/build.sh",
+    "prefixes": [
+      "srt"
+    ],
+    "noticeAssets": [
+      "licenses/MPL-2.0.txt"
+    ]
+  },
+  "libssh": {
+    "name": "libssh",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1, BSD 2-Clause",
+    "source": "https://www.libssh.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libssh/build.sh",
+    "prefixes": [
+      "ssh"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt",
+      "licenses/BSD-2-Clause.txt"
+    ]
+  },
+  "libtheora": {
+    "name": "libtheora",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD",
+    "source": "https://www.theora.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libtheora/build.sh",
+    "prefixes": [
+      "theora",
+      "theoradec",
+      "theoraenc"
+    ],
+    "noticeAssets": [
+      "licenses/libtheora-notices.txt"
+    ]
+  },
+  "libudfread": {
+    "name": "libudfread",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://code.videolan.org/videolan/libudfread/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libudfread/build.sh",
+    "prefixes": [
+      "udfread"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "libunistring": {
+    "name": "libunistring",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-3.0, GPL-2.0",
+    "source": "https://www.gnu.org/software/libunistring/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libunistring/build.sh",
+    "prefixes": [
+      "unistring"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-3.0-only.txt",
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libv4l": {
+    "name": "libv4l",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.1",
+    "source": "https://git.linuxtv.org/v4l-utils.git",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libv4l/build.sh",
+    "prefixes": [
+      "v4l1",
+      "v4l2",
+      "v4l2rds",
+      "v4lconvert"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.1-only.txt"
+    ]
+  },
+  "libvidstab": {
+    "name": "libvidstab",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://github.com/georgmartius/vid.stab",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libvidstab/build.sh",
+    "prefixes": [
+      "vidstab"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libvmaf": {
+    "name": "libvmaf",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD-2-Clause-Patent",
+    "source": "https://github.com/Netflix/vmaf",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libvmaf/build.sh",
+    "prefixes": [
+      "vmaf"
+    ],
+    "noticeAssets": [
+      "licenses/vmaf-notices.txt"
+    ]
+  },
+  "libvo-amrwbenc": {
+    "name": "libvo-amrwbenc",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "Apache-2.0",
+    "source": "https://sourceforge.net/projects/opencore-amr/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libvo-amrwbenc/build.sh",
+    "prefixes": [
+      "vo-amrwbenc"
+    ],
+    "noticeAssets": [
+      "licenses/Apache-2.0.txt"
+    ]
+  },
+  "libvorbis": {
+    "name": "libvorbis",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://xiph.org/vorbis/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libvorbis/build.sh",
+    "prefixes": [
+      "vorbis",
+      "vorbisenc",
+      "vorbisfile"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libvpx": {
+    "name": "libvpx",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "BSD 3-Clause",
+    "source": "https://www.webmproject.org",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libvpx/build.sh",
+    "prefixes": [
+      "vpx"
+    ],
+    "noticeAssets": [
+      "licenses/BSD-3-Clause.txt"
+    ]
+  },
+  "libx264": {
+    "name": "libx264",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://www.videolan.org/developers/x264.html",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libx264/build.sh",
+    "prefixes": [
+      "x264"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libx265": {
+    "name": "libx265",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://www.x265.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libx265/build.sh",
+    "prefixes": [
+      "x265"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libxml2": {
+    "name": "libxml2",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "MIT",
+    "source": "https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libxml2/build.sh",
+    "prefixes": [
+      "xml2"
+    ],
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ]
+  },
+  "xvidcore": {
+    "name": "xvidcore",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "GPL-2.0",
+    "source": "https://www.xvid.com/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/xvidcore/build.sh",
+    "prefixes": [
+      "xvidcore"
+    ],
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ]
+  },
+  "libzimg": {
+    "name": "libzimg",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "WTFPL",
+    "source": "https://github.com/sekrit-twc/zimg",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libzimg/build.sh",
+    "prefixes": [
+      "zimg"
+    ],
+    "noticeAssets": [
+      "licenses/WTFPL.txt"
+    ]
+  },
+  "libzmq": {
+    "name": "libzmq",
+    "version": "Bundled with youtubedl-android 0.18.1",
+    "license": "LGPL-2.0",
+    "source": "https://zeromq.org/",
+    "metadataSource": "https://raw.githubusercontent.com/termux/termux-packages/master/packages/libzmq/build.sh",
+    "prefixes": [
+      "zmq"
+    ],
+    "noticeAssets": [
+      "licenses/LGPL-2.0-only.txt"
+    ]
+  },
+  "quickjs": {
+    "name": "QuickJS",
+    "version": "2025-04-26",
+    "license": "MIT",
+    "source": "https://bellard.org/quickjs/",
+    "licenseSource": "https://bellard.org/quickjs/",
+    "noticeAssets": [
+      "licenses/MIT.txt"
+    ],
+    "prefixes": [
+      "qjs",
+      "quickjs"
+    ]
+  },
+  "pycryptodome": {
+    "name": "PyCryptodome (Cryptodome package)",
+    "version": "3.23.0",
+    "license": "BSD-2-Clause and public-domain portions",
+    "source": "https://github.com/Legrandin/pycryptodome",
+    "licenseSource": "https://github.com/Legrandin/pycryptodome",
+    "noticeAssets": [
+      "licenses/pycryptodome-notices.txt"
+    ],
+    "prefixes": []
+  },
+  "mutagen": {
+    "name": "Mutagen",
+    "version": "1.47.0",
+    "license": "GPL-2.0-or-later",
+    "source": "https://github.com/quodlibet/mutagen",
+    "licenseSource": "https://github.com/quodlibet/mutagen",
+    "noticeAssets": [
+      "licenses/GPL-2.0-only.txt"
+    ],
+    "prefixes": []
+  },
+  "mozilla-ca": {
+    "name": "Mozilla CA certificate data",
+    "version": "Bundled with Python runtime 0.18.1",
+    "license": "MPL-2.0",
+    "source": "https://curl.se/docs/caextract.html",
+    "licenseSource": "https://curl.se/docs/caextract.html",
+    "noticeAssets": [
+      "licenses/MPL-2.0.txt"
+    ],
+    "prefixes": []
+  },
+  "mpdecimal": {
+    "name": "libmpdec / decimal arithmetic",
+    "version": "Bundled with CPython 3.12",
+    "license": "BSD-2-Clause",
+    "source": "https://www.bytereef.org/mpdecimal/",
+    "licenseSource": "https://www.bytereef.org/mpdecimal/",
+    "noticeAssets": [
+      "licenses/python-notices.txt"
+    ],
+    "prefixes": []
+  },
+  "unicode": {
+    "name": "Unicode character data",
+    "version": "Bundled with CPython 3.12",
+    "license": "Unicode data license (see Python notices)",
+    "source": "https://www.unicode.org/license.txt",
+    "licenseSource": "https://www.unicode.org/license.txt",
+    "noticeAssets": [
+      "licenses/python-notices.txt"
+    ],
+    "prefixes": []
+  }
+}

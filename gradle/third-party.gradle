@@ -1,0 +1,78 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+
+def sha256 = { File file ->
+    def digest = MessageDigest.getInstance('SHA-256')
+    file.withInputStream { stream ->
+        byte[] buffer = new byte[65536]
+        int count
+        while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+    }
+    digest.digest().encodeHex().toString()
+}
+def runtimeArtifacts = {
+    def byId = [:]
+    ['debugRuntimeClasspath', 'releaseRuntimeClasspath'].each { name ->
+        def configuration = configurations.getByName(name)
+        configuration.incoming.artifacts.artifacts.each { artifact ->
+            if (!(artifact.id.componentIdentifier instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier)) {
+                throw new GradleException("Third-party credits need a provenance entry for local/project dependency ${artifact.id}. Update the credits generator before shipping it.")
+            }
+            def id = artifact.id.componentIdentifier.toString()
+            def row = [id: id, file: artifact.file.absolutePath, sha256: sha256(artifact.file)]
+            if (byId[id] && byId[id].sha256 != row.sha256) throw new GradleException("Different runtime artifacts use the same coordinate: $id")
+            byId[id] = row
+        }
+    }
+    byId.values().sort { it.id }
+}
+tasks.register('exportThirdPartyArtifacts') {
+    group = 'documentation'
+    description = 'Exports the resolved runtime inputs for scripts/update_credits.py.'
+    doLast {
+        def output = layout.buildDirectory.file('third-party-artifacts.json').get().asFile
+        output.parentFile.mkdirs()
+        output.text = JsonOutput.prettyPrint(JsonOutput.toJson(runtimeArtifacts())) + '\n'
+        logger.lifecycle("Exported third-party inputs to $output")
+    }
+}
+tasks.register('verifyThirdPartyCredits') {
+    group = 'verification'
+    description = 'Prevents dependency or vendored-code changes from shipping with stale About credits.'
+    inputs.files(configurations.named('debugRuntimeClasspath'), configurations.named('releaseRuntimeClasspath'))
+    inputs.file('src/main/assets/third_party.json')
+    inputs.file('src/main/res/raw/ytdlp')
+    inputs.file(rootProject.file('scripts/update_credits.py'))
+    inputs.files(fileTree('src/main/assets/licenses'), rootProject.fileTree('third_party'))
+    doLast {
+        def catalog = new JsonSlurper().parse(file('src/main/assets/third_party.json'))
+        def toolVersions = [
+            'Gradle': gradle.gradleVersion,
+            'Android Gradle Plugin': (rootProject.buildFile.text =~ /com\.android\.application' version '([^']+)'/)[0][1],
+            'JUnit': configurations.testImplementation.dependencies.find { it.group == 'junit' && it.name == 'junit' }?.version,
+            'Robolectric': configurations.testImplementation.dependencies.find { it.group == 'org.robolectric' && it.name == 'robolectric' }?.version
+        ]
+        if (catalog.toolVersions != toolVersions) throw new GradleException('Build/test tool versions changed. Regenerate the About catalog.')
+        def actual = runtimeArtifacts().collectEntries { [(it.id): it.sha256] }
+        if (actual != catalog.artifactHashes) throw new GradleException('About credits are stale. Run :app:exportThirdPartyArtifacts, then python3 scripts/update_credits.py from the repository root; review new licenses and rerun the build.')
+        catalog.registryHashes.each { path, hash ->
+            def input = rootProject.file(path)
+            if (!input.isFile() || sha256(input) != hash) throw new GradleException("Attribution inputs changed: $path. Regenerate the About catalog.")
+        }
+        catalog.licenseHashes.each { path, hash ->
+            if (!file("src/main/assets/$path").isFile() || sha256(file("src/main/assets/$path")) != hash) throw new GradleException("License notice changed: $path. Regenerate and review the catalog.")
+        }
+        catalog.vendoredFiles.each { path, hash ->
+            if (!rootProject.file(path).isFile() || sha256(rootProject.file(path)) != hash) throw new GradleException("About credits are stale for $path. Update scripts/update_credits.py inputs and regenerate the catalog.")
+        }
+        catalog.components.each { component ->
+            if (!component.name || !component.source || !component.license) throw new GradleException("Incomplete third-party credit: ${component.id}")
+            component.noticeAssets.each { path ->
+                if (!file("src/main/assets/$path").isFile()) throw new GradleException("Missing license text $path")
+            }
+        }
+        logger.lifecycle("Verified ${catalog.components.size()} third-party credits.")
+    }
+}
+tasks.named('preBuild').configure { dependsOn tasks.named('verifyThirdPartyCredits') }

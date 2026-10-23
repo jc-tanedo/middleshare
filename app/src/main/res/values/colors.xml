@@ -1,0 +1,8 @@
+<resources>
+    <color name="background">#F5F6F2</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="ink">#1B2F2A</color>
+    <color name="muted">#586B64</color>
+    <color name="accent">#146C5B</color>
+    <bool name="light_system_bars">true</bool>
+</resources>

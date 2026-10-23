@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">MiddleShare</string>
+    <string name="processor_rule">WebP  →  %1$s</string>
+    <string name="try_image">Try it with an image</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="preparing_image">Preparing your image…</string>
+    <string name="preparing_batch">Preparing image %1$d of %2$d…</string>
+    <string name="preparing_video">Preparing your video…</string>
+    <string name="about_button">About &amp; open-source licenses</string>
+    <string name="about_title">About MiddleShare</string>
+    <string name="about_intro">Made possible by open-source software. Tap a component to read its included license notices or visit its source.</string>
+    <string name="app_version">MiddleShare %1$s</string>
+    <string name="app_license">MiddleShare license · GPL v3</string>
+    <string name="project_source">MiddleShare source code</string>
+    <string name="back">Back</string>
+    <string name="source">Source</string>
+    <string name="license_texts">License texts</string>
+    <string name="development_only">Build/test tool · not included in the app</string>
+    <string name="credits_unavailable">The included license notices could not be loaded. Please reinstall MiddleShare.</string>
+    <string name="no_browser">No browser is available to open this link.</string>
+</resources>

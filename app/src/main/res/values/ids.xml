@@ -1,0 +1,4 @@
+<resources>
+    <item name="about_button" type="id" />
+    <item name="credits_list" type="id" />
+</resources>
