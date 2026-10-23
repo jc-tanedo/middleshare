@@ -35,3 +35,14 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+key.properties
+keystore.properties

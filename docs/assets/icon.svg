@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="MiddleShare share-node M icon">
+  <path d="M24,0H84Q108,0 108,24V84Q108,108 84,108H24Q0,108 0,84V24Q0,0 24,0Z" fill="#2E3440" />
+  <path d="M31,70 L31,38 L48,52" fill="none" stroke="#88C0D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M60,52 L77,38 L77,70" fill="none" stroke="#ECEFF4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M27,38a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#88C0D0" />
+  <path d="M27,70a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#88C0D0" />
+  <path d="M44,52a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#88C0D0" />
+  <path d="M56,52a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#ECEFF4" />
+  <path d="M73,38a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#ECEFF4" />
+  <path d="M73,70a4,4 0,1 0,8,0a4,4 0,1 0,-8,0" fill="#ECEFF4" />
+  <path d="M52.75,30a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,38a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,46a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,54a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,62a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,70a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+  <path d="M52.75,78a1.25,1.25 0,1 0,2.5,0a1.25,1.25 0,1 0,-2.5,0" fill="#81A1C1" />
+</svg>

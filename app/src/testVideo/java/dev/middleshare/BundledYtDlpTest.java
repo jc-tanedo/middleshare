@@ -1,18 +1,21 @@
 package dev.middleshare;
 
 import static org.junit.Assert.*;
-import java.io.File;
-import java.nio.file.Files;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.io.File;
+import java.nio.file.Files;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 35)
 public class BundledYtDlpTest {
-    @Test public void payloadMatchesOfficialChecksumAndInstallRepairsOlderCopy() throws Exception {
+    @Test
+    public void payloadMatchesOfficialChecksumAndInstallRepairsOlderCopy() throws Exception {
         var context = RuntimeEnvironment.getApplication();
         try (var input = context.getResources().openRawResource(R.raw.ytdlp)) {
             assertEquals(BundledYtDlp.SHA256, BundledYtDlp.digest(input));
@@ -23,7 +26,7 @@ public class BundledYtDlpTest {
         long modified = target.lastModified();
         BundledYtDlp.install(context);
         assertEquals(modified, target.lastModified());
-        Files.write(target.toPath(), new byte[]{0});
+        Files.write(target.toPath(), new byte[] {0});
         BundledYtDlp.install(context);
         assertArrayEquals(expected, Files.readAllBytes(target.toPath()));
     }

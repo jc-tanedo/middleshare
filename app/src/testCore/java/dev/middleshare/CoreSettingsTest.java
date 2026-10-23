@@ -1,14 +1,18 @@
 package dev.middleshare;
+
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 35)
 public class CoreSettingsTest {
-    @Test public void videoQualityDefaultAndCustomChoicePersistWithoutAnyFormatLookup() {
+    @Test
+    public void videoQualityDefaultAndCustomChoicePersistWithoutAnyFormatLookup() {
         var controller = Robolectric.buildActivity(MainActivity.class).setup();
         try {
             assertEquals(VideoQuality.BEST, Settings.getVideoQuality(controller.get()));
@@ -19,9 +23,13 @@ public class CoreSettingsTest {
             controller.recreate();
             picker = controller.get().findViewById(R.id.video_quality);
             assertEquals(VideoQuality.CUSTOM.ordinal(), picker.getSelectedItemPosition());
-        } finally { controller.pause().stop().destroy(); }
+        } finally {
+            controller.pause().stop().destroy();
+        }
     }
-    @Test public void formatPersistsAcrossScreenRecreation() {
+
+    @Test
+    public void formatPersistsAcrossScreenRecreation() {
         var controller = Robolectric.buildActivity(MainActivity.class).setup();
         MainActivity activity = controller.get();
         ((android.widget.RadioButton) activity.findViewById(2)).performClick();

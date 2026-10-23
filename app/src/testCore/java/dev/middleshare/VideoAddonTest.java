@@ -2,6 +2,7 @@ package dev.middleshare;
 
 import static org.junit.Assert.*;
 import static org.robolectric.Shadows.shadowOf;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -9,6 +10,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,17 +24,22 @@ import org.robolectric.shadows.ShadowAlertDialog;
 @Config(sdk = 35)
 public class VideoAddonTest {
     private Context context;
-    @Before public void setup() throws Exception {
+
+    @Before
+    public void setup() throws Exception {
         context = RuntimeEnvironment.getApplication();
-        var main = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES);
-        main.signatures = new Signature[]{new Signature(new byte[]{1})};
+        var main =
+                context.getPackageManager()
+                        .getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES);
+        main.signatures = new Signature[] {new Signature(new byte[] {1})};
         shadowOf(context.getPackageManager()).installPackage(main);
     }
+
     private void install(int version, int signature, boolean enabled) {
         PackageInfo addon = new PackageInfo();
         addon.packageName = VideoAddon.PACKAGE;
         addon.setLongVersionCode(version);
-        addon.signatures = new Signature[]{new Signature(new byte[]{(byte) signature})};
+        addon.signatures = new Signature[] {new Signature(new byte[] {(byte) signature})};
         addon.applicationInfo = new ApplicationInfo();
         addon.applicationInfo.packageName = addon.packageName;
         addon.applicationInfo.enabled = enabled;
@@ -42,26 +49,33 @@ public class VideoAddonTest {
         activity.applicationInfo = addon.applicationInfo;
         activity.enabled = true;
         activity.exported = true;
-        addon.activities = new ActivityInfo[]{activity};
+        addon.activities = new ActivityInfo[] {activity};
         shadowOf(context.getPackageManager()).installPackage(addon);
     }
-    @Test public void missingOldUntrustedAndDisabledAddonsAreRejected() {
+
+    @Test
+    public void missingOldUntrustedAndDisabledAddonsAreRejected() {
         assertFalse(VideoAddon.available(context));
-        install(5, 2, true);
+        install(VideoAddon.MIN_VERSION, 2, true);
         assertFalse(VideoAddon.available(context));
-        install(4, 1, true);
+        install(VideoAddon.MIN_VERSION - 1, 1, true);
         assertFalse(VideoAddon.available(context));
-        install(5, 1, false);
+        install(VideoAddon.MIN_VERSION, 1, false);
         assertFalse(VideoAddon.available(context));
-        install(6, 1, true);
+        install(VideoAddon.MIN_VERSION, 1, true);
         assertTrue(VideoAddon.available(context));
     }
-    @Test public void installedAddonReceivesOnlyTheParsedLinkAndMainFinishes() {
-        install(6, 1, true);
+
+    @Test
+    public void installedAddonReceivesOnlyTheParsedLinkAndMainFinishes() {
+        install(VideoAddon.MIN_VERSION, 1, true);
         Settings.setVideoQuality(context, VideoQuality.MOBILE);
-        Intent incoming = new Intent(context, ShareActivity.class).setAction(Intent.ACTION_SEND)
-                .setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Watch https://example.org/video")
-                .putExtra("untrusted-extra", "never forward");
+        Intent incoming =
+                new Intent(context, ShareActivity.class)
+                        .setAction(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, "Watch https://example.org/video")
+                        .putExtra("untrusted-extra", "never forward");
         var controller = Robolectric.buildActivity(ShareActivity.class, incoming).setup();
         try {
             var outgoing = shadowOf(controller.get()).getNextStartedActivity();
@@ -72,11 +86,18 @@ public class VideoAddonTest {
             assertFalse(outgoing.hasExtra("untrusted-extra"));
             assertEquals("MOBILE", outgoing.getStringExtra(VideoAddon.QUALITY));
             assertTrue(controller.get().isFinishing());
-        } finally { controller.pause().stop().destroy(); }
+        } finally {
+            controller.pause().stop().destroy();
+        }
     }
-    @Test public void missingAddonOffersReleasesAndRetryAfterInstallation() {
-        Intent incoming = new Intent(context, ShareActivity.class).setAction(Intent.ACTION_SEND)
-                .setType("text/plain").putExtra(Intent.EXTRA_TEXT, "https://example.org/video");
+
+    @Test
+    public void missingAddonOffersReleasesAndRetryAfterInstallation() {
+        Intent incoming =
+                new Intent(context, ShareActivity.class)
+                        .setAction(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, "https://example.org/video");
         var controller = Robolectric.buildActivity(ShareActivity.class, incoming).setup();
         try {
             assertNull(shadowOf(controller.get()).getNextStartedActivity());
@@ -86,11 +107,17 @@ public class VideoAddonTest {
             var releases = shadowOf(controller.get()).getNextStartedActivity();
             assertEquals(Intent.ACTION_VIEW, releases.getAction());
             assertEquals(VideoAddon.RELEASES, releases.getDataString());
-            install(6, 1, true);
+            install(VideoAddon.MIN_VERSION, 1, true);
             controller.get().findViewById(R.id.video_retry).performClick();
-            assertEquals(VideoAddon.PACKAGE, shadowOf(controller.get()).getNextStartedActivity()
-                    .getComponent().getPackageName());
+            assertEquals(
+                    VideoAddon.PACKAGE,
+                    shadowOf(controller.get())
+                            .getNextStartedActivity()
+                            .getComponent()
+                            .getPackageName());
             assertTrue(controller.get().isFinishing());
-        } finally { controller.pause().stop().destroy(); }
+        } finally {
+            controller.pause().stop().destroy();
+        }
     }
 }
