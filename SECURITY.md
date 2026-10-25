@@ -11,7 +11,8 @@ Include the app version, Android version, affected flavor (main or video add-on)
 - The main app has no internet permission or bundled video runtime.
 - Incoming files use `content://` grants; generated files are exposed through a non-exported, read-only provider with per-file URI grants.
 - The video add-on is checked for its package, minimum version, enabled state, and matching signing certificate.
-- Video download confirmation is enforced by a non-exported activity; intent extras cannot prove consent.
+- Ordinary video download confirmation uses a non-exported activity; intent extras cannot prove consent. The opt-in **MiddleShare Favorite** shortcut automates preset processing with a locally configured destination. Its cross-APK handoff requires a signature permission, and public receivers ignore caller-supplied destinations.
+- The download service is non-exported. Notification PendingIntents are explicit and immutable; file read grants are attached only when handing a finished video to a user-chosen receiver. Transfer metadata is private, excluded from backups, and omits source URLs.
 - Signing keys belong in GitHub Actions secrets or private local storage, never in Git. The release workflow verifies APK signing certificates and removes the temporary key.
 
 See the [2026-10-23 repository audit](docs/AUDIT-2026-10-23.md) for findings, fixes, and scope. An audit is a point-in-time review, not a guarantee that every vulnerability has been found.

@@ -35,13 +35,15 @@ Android may ask you to allow installation from your browser or file manager. `SH
 
 1. Share an image or one supported video link to **MiddleShare**.
 2. WebP converts using your saved format. For a video, choose a quality and tap **Download video**.
-3. Pick the app that should receive the file. For videos, **Choose destination** during the download to open that app with the finished video automatically.
+3. Pick the app that should receive the file. Video downloads move to an ongoing notification; use **Choose destination**, then tap **Send** when ready.
 
 Open MiddleShare to choose **JPEG or PNG**, set video quality, manage **Site preferences**, or change the theme. Video defaults to **Best**, letting yt-dlp choose. **Mobile**, **Standard**, **Full**, and **Custom** are also available; Custom loads formats only when selected.
 
+Choose a **Favorite app** in settings to enable the **MiddleShare Favorite** share shortcut. Images go straight to that app after processing; video links use the saved quality and destination. Custom video quality still asks you to choose a format.
+
 The main app works offline and requests no internet permission. Video downloads contact the source site and need the optional add-on. Sharing a video link without it offers the Releases page so you can install it once and retry.
 
-**Good to know:** animated WebP becomes a still image, other image formats pass through unchanged, videos have a 256 MiB final-file limit, and downloads need the app to remain open. Support varies by site; there is no sign-in/cookie flow. See [usage and limits](docs/USAGE.md) for details.
+**Good to know:** animated WebP becomes a still image, other image formats pass through unchanged, videos have a 256 MiB final-file limit, and one video downloads at a time. Background downloads use an Android foreground service. Force-stopping the app or restarting the phone interrupts them. Support varies by site; there is no sign-in/cookie flow. See [usage and limits](docs/USAGE.md) for details.
 
 ## Documentation
 

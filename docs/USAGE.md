@@ -25,21 +25,31 @@ Presets start without a separate format-list lookup. Merely opening settings or 
 
 A Custom default prompts for a new choice on each shared link. Exact format IDs are specific to that link and are never saved in preferences. Results are reused within the share, including across rotation; leaving Custom cancels an unfinished lookup. If loading fails, tap Custom again to retry or use a preset. Resolution caps apply when the source reports dimensions; sources with unknown resolution may pass through. All choices retain the 256 MiB final-file, temporary-storage, and download-time limits below. Full is not an unlimited file-size setting.
 
-Use matching main/add-on APKs from release 0.6.1 or later to include the download-confirmation security fix. The main app rejects older add-ons.
+Use matching main/add-on APKs from release 0.8.0 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
 
-## Choose a destination while downloading
+## Background downloads and destinations
 
-Tap **Download video**, then **Choose destination** in the progress drawer. Android lets you pick an app while the download continues; the app receives the file only after it is complete. You can change the destination before completion. Canceling the picker keeps any previous selection, or uses the normal share sheet if no app has been selected.
+After **Download video**, an Android foreground service owns the download. With notifications enabled, the drawer closes and an ongoing notification shows progress, **Choose destination**, and **Cancel**. You can switch apps or close the drawer. On Android 13+, the video add-on asks for notification permission; if you decline or disable the channel, a progress drawer remains available instead. The add-on's home screen also has **View downloads** and notification settings.
 
-The selection is scoped to the current share and survives rotation. If you leave MiddleShare or keep the picker open, handing over waits until you return and finish choosing. If the chosen app is unavailable or cannot receive the finished format, the usual share sheet opens instead. Choosing a destination is optional.
+Choose a destination through the ongoing notification. No unfinished file or URI read grant is sent to that app. When the video is complete, the notification becomes **Video ready to send**. Tap **Send** to open your chosen app, or pick a compatible app if no destination was selected or it is no longer available. Android restricts automatic app launches from the background, so completion does not pop another app over what you are doing.
 
-This selects an **app**, not a contact or conversation. Finish choosing the recipient and sending inside that app. No incomplete file or temporary read grant is sent while choosing.
+Ready notifications remain until handoff or **Discard**. Handoff clears the notification but retains the cached file for the receiving app to read. This selects an **app**, not a contact or conversation: finish choosing the recipient and sending inside that app. MiddleShare cannot observe the final Send action in another app.
+
+The selected destination and ready-file metadata are saved privately without the source URL. Rotation and closing the drawer do not restart a download. A force stop, reboot, service timeout, or process loss can interrupt it; interrupted records explain that you need to share the link again. There is no automatic restart or resumable download queue. Android may allow users to dismiss ongoing notifications; pending work remains accessible in **View downloads**.
+
+## Favorite share shortcut
+
+In the main app, choose **Favorite app**. The app picker includes compatible image/video receivers and excludes MiddleShare itself. You can change or clear the favorite at any time.
+
+Share to **MiddleShare Favorite** to process images and open the configured app without another destination selection. Video links use the configured site's quality (or global fallback) and saved favorite automatically; Custom still opens the per-link format picker. Video downloads finish through the ready notification as above. If no favorite is set, the shortcut uses the ordinary share flow. If the favorite cannot receive a particular image/batch/video format, choose another compatible receiver.
+
+The favorite is a local app/activity preference. Sender-supplied destination extras are ignored by public receivers. The main app passes its saved favorite to the video add-on through a signature-permission-protected activity; use APKs from the same signed release.
 
 ## Download behavior
 
 - Downloads one video; playlist links are limited to their first entry. Live/upcoming streams are excluded.
-- Shows progress and supports cancellation. Rotation retains the job; the share sheet opens once the activity is visible again.
-- Keep the app open while downloading. There is no foreground service or durable background queue; Android can stop a background process.
+- Shows progress and supports cancellation. One active video download is allowed at a time; up to 20 completed/interrupted records can wait for handoff or discard.
+- A `dataSync` foreground service and bounded CPU wake lock keep a download independent of the drawer. Android 15 foreground-service timeouts are handled as interruptions. A foreground service does not make the process immune to force stops or system termination.
 - Maximum final video: 256 MiB. Temporary files are monitored with a 768 MiB cap and a 10-minute deadline. Network retries and socket waits are bounded. At least 512 MiB of allocatable storage is required before starting. yt-dlp skips sources known to exceed its size limit; the final output is checked again.
 - Cancelling or failing removes partial files. Successful outputs live in private cache and are pruned on the next share after 24 hours. Android may evict cached files earlier. Old interrupted download directories are pruned as well.
 - Read-only content URIs, MIME types, filenames, sizes, `EXTRA_STREAM`, and `ClipData` read grants let receiving apps read the files. MiddleShare excludes itself from the outgoing chooser.

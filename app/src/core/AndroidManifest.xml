@@ -1,5 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <permission android:name="dev.middleshare.permission.SHARE_FAVORITE" android:protectionLevel="signature" />
+    <uses-permission android:name="dev.middleshare.permission.SHARE_FAVORITE" />
+    <queries>
+        <intent><action android:name="android.intent.action.SEND" /><data android:mimeType="image/*" /></intent>
+        <intent><action android:name="android.intent.action.SEND" /><data android:mimeType="video/*" /></intent>
+    </queries>
     <application>
+        <activity android:name=".FavoriteShareActivity" android:label="@string/favorite_share_label" android:icon="@drawable/ic_favorite_share" android:theme="@style/ShareSheetTheme" android:exported="true" android:excludeFromRecents="true">
+            <intent-filter><action android:name="android.intent.action.SEND" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="image/*" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.SEND" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="text/plain" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.SEND_MULTIPLE" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="image/*" /></intent-filter>
+        </activity>
         <activity android:name=".ShareActivity" android:theme="@style/ShareSheetTheme" android:exported="true" android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

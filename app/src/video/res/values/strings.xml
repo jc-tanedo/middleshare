@@ -4,4 +4,19 @@
     <string name="video_format_loading">Loading available formats…</string>
     <string name="video_preset_hint">No format lookup is needed for this preset.</string>
     <string name="video_formats_empty">No video formats found. Try a preset.</string>
+    <string name="transfer_channel">Video downloads</string>
+    <string name="transfer_channel_description">Ongoing download progress and ready-to-send videos.</string>
+    <string name="transfer_starting">Starting download…</string>
+    <string name="transfer_ready">Video ready to send</string>
+    <string name="transfer_failed">Video download stopped</string>
+    <string name="transfer_tap_send">Tap Send to open your destination app.</string>
+    <string name="transfer_send">Send</string>
+    <string name="transfer_discard">Discard</string>
+    <string name="transfer_state_warning">Download state could not be saved. Keep this session open.</string>
+    <string name="transfer_already_running">Another video is downloading. Use its notification to follow or cancel it, then try again.</string>
+    <string name="transfer_interrupted">The download was interrupted. Share the link again to retry.</string>
+    <string name="transfer_missing">This download is no longer available. Share the link again.</string>
+    <string name="transfer_notifications_disabled">Downloads can continue, but notifications are disabled. Enable them in the video add-on’s notification settings to follow progress in the background.</string>
+    <string name="no_downloads">No pending downloads.</string>
+    <string name="transfer_pending_limit">Send or discard pending videos in View downloads before starting another download.</string>
 </resources>

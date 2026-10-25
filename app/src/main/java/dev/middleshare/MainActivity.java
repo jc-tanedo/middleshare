@@ -48,6 +48,7 @@ public final class MainActivity extends Activity {
             return;
         }
 
+        FavoritePreferences.addCard(this, page);
         LinearLayout images = Ui.card(this, page);
         Ui.heading(this, images, "Images", "Turn WebP into a format your destination app accepts.");
         TextView rule = Ui.text(this, "", 14, Ui.ACCENT, true);
@@ -139,7 +140,18 @@ public final class MainActivity extends Activity {
         Button sites = Ui.button(this, R.string.site_preferences, false);
         sites.setOnClickListener(v -> SitePreferences.show(this));
         videos.addView(sites, new LinearLayout.LayoutParams(-1, -2));
-        if (!VideoAddon.available(this)) {
+        if (VideoAddon.available(this)) {
+            Ui.gap(this, videos, 8);
+            Button tools = Ui.button(this, R.string.video_tools, false);
+            tools.setOnClickListener(
+                    v -> {
+                        Intent launch =
+                                getPackageManager().getLaunchIntentForPackage(VideoAddon.PACKAGE);
+                        if (launch != null) startActivity(launch);
+                        else VideoAddon.releases(this);
+                    });
+            videos.addView(tools, new LinearLayout.LayoutParams(-1, -2));
+        } else {
             Ui.gap(this, videos, 8);
             Button releases = Ui.button(this, R.string.video_releases, false);
             releases.setOnClickListener(v -> VideoAddon.releases(this));
@@ -213,6 +225,26 @@ public final class MainActivity extends Activity {
                         16,
                         Ui.MUTED,
                         false));
+        Button downloads = Ui.button(this, R.string.view_downloads, true);
+        downloads.setOnClickListener(
+                v ->
+                        startActivity(
+                                new Intent()
+                                        .setClassName(
+                                                this, "dev.middleshare.VideoTransfersActivity")));
+        page.addView(downloads);
+        Ui.gap(this, page, 8);
+        Button notifications = Ui.button(this, R.string.transfer_notification_settings, false);
+        notifications.setOnClickListener(
+                v ->
+                        startActivity(
+                                new Intent(
+                                                android.provider.Settings
+                                                        .ACTION_APP_NOTIFICATION_SETTINGS)
+                                        .putExtra(
+                                                android.provider.Settings.EXTRA_APP_PACKAGE,
+                                                getPackageName())));
+        page.addView(notifications);
         addAbout(page);
     }
 

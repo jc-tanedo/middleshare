@@ -15,8 +15,12 @@ final class ShareDestinations {
     }
 
     static Intent picker(Context context) {
+        return picker(context, "video/*");
+    }
+
+    static Intent picker(Context context, String mime) {
         return new Intent(Intent.ACTION_PICK_ACTIVITY)
-                .putExtra(Intent.EXTRA_INTENT, videoIntent())
+                .putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_SEND).setType(mime))
                 .putExtra(Intent.EXTRA_TITLE, context.getString(R.string.choose_destination));
     }
 
@@ -28,16 +32,25 @@ final class ShareDestinations {
                 context.getPackageManager()
                         .queryIntentActivities(payload, PackageManager.MATCH_DEFAULT_ONLY)) {
             var activity = candidate.activityInfo;
-            if (activity != null
-                    && activity.enabled
-                    && activity.exported
-                    && (activity.applicationInfo == null || activity.applicationInfo.enabled)
-                    && target.equals(new ComponentName(activity.packageName, activity.name))
-                    && (activity.permission == null
-                            || context.checkSelfPermission(activity.permission)
-                                    == PackageManager.PERMISSION_GRANTED)) return true;
+            if (receiverAllowed(context, activity)
+                    && target.equals(new ComponentName(activity.packageName, activity.name)))
+                return true;
         }
         return false;
+    }
+
+    static boolean receiverAllowed(Context context, android.content.pm.ActivityInfo activity) {
+        return activity != null
+                && activity.name != null
+                && activity.packageName != null
+                && !activity.packageName.equals("dev.middleshare")
+                && !activity.packageName.equals(VideoAddon.PACKAGE)
+                && activity.enabled
+                && activity.exported
+                && (activity.applicationInfo == null || activity.applicationInfo.enabled)
+                && (activity.permission == null
+                        || context.checkSelfPermission(activity.permission)
+                                == PackageManager.PERMISSION_GRANTED);
     }
 
     static boolean available(Context context, ComponentName target) {

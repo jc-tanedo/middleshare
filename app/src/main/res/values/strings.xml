@@ -37,4 +37,15 @@
     <string name="destination_picker_unavailable">App selection is unavailable. The share sheet will open when your video is ready.</string>
     <string name="destination_unavailable">The selected app can’t receive this video. Choose another app from the share sheet.</string>
     <string name="processing_details">Images convert locally; video links download from the source site.</string>
+    <string name="continue_background">Continue in background</string>
+    <string name="favorite_title">Favorite app</string>
+    <string name="favorite_description">Use MiddleShare Favorite in the share sheet to send processed files straight to your chosen app.</string>
+    <string name="favorite_choose">Choose favorite app</string>
+    <string name="favorite_clear">Clear favorite</string>
+    <string name="favorite_none">No favorite selected</string>
+    <string name="favorite_no_apps">No app is available to receive images or videos.</string>
+    <string name="favorite_not_set">Choose a favorite in MiddleShare settings. Using the normal share flow for now.</string>
+    <string name="transfer_notification_settings">Download notification settings</string>
+    <string name="view_downloads">View downloads</string>
+    <string name="video_tools">Video add-on &amp; downloads</string>
 </resources>

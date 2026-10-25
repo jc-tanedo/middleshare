@@ -1,6 +1,6 @@
 # Releasing MiddleShare
 
-Version tags such as `v0.7.0` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, verifies their signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
+Version tags such as `v0.8.0` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, verifies their signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
 
 ## One-time signing setup
 
@@ -28,8 +28,8 @@ The workflow refuses to publish without these secrets. It uses the job's built-i
 2. Tag that commit with the exact matching version (stable `vMAJOR.MINOR.PATCH` tags are supported):
 
    ```sh
-   git tag -a v0.7.0 -m "MiddleShare 0.7.0"
-   git push origin v0.7.0
+   git tag -a v0.8.0 -m "MiddleShare 0.8.0"
+   git push origin v0.8.0
    ```
 
 3. Wait for **Actions → Release**. The published release includes the small main APK, four video add-on APKs (three ABIs plus universal), checksums, install instructions, and GitHub's source archives. The app links to `https://github.com/jc-tanedo/middleshare/releases/latest`.
@@ -40,14 +40,16 @@ The first public release uses a different certificate from development/debug bui
 
 ## Local signed build
 
-Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`, then run `./gradlew assembleCoreRelease assembleVideoRelease`. Without signing variables, local release builds remain unsigned. Do not publish unsigned APKs. `RELEASE_TAG=v0.7.0 python3 scripts/release.py collect` verifies and stages signed APKs under ignored `release-assets/` when the Android SDK is configured.
+Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`, then run `./gradlew assembleCoreRelease assembleVideoRelease`. Without signing variables, local release builds remain unsigned. Do not publish unsigned APKs. `RELEASE_TAG=v0.8.0 python3 scripts/release.py collect` verifies and stages signed APKs under ignored `release-assets/` when the Android SDK is configured.
 
 ## Device checks before tagging
 
 - Install the lightweight main APK alone: convert WebP in both themes; share a link and check the Releases/install prompt.
 - Install the matching video add-on: return to the pending share, tap **Try again**, download a public video, and share playable video/audio to another app.
 - Check Mobile (480p), Standard (1080p), Full, and the Custom format picker. Presets must not perform a separate format lookup; selecting Custom should load once, survive rotation, and cancel when leaving it.
-- Choose a video destination while downloading; check rotation, canceling the picker, and a receiver that becomes unavailable. Confirm the receiving app opens once with readable video/audio.
+- Allow/deny notification permission on Android 13+; check foreground progress, Cancel, screen-off/background behavior, and ready Send/Discard. Open View downloads after notifications are disabled or dismissed. Force-stop/reopen: interrupted work must not restart automatically.
+- Choose a favorite; share an image, batch, and link to MiddleShare Favorite. Check incompatible/missing favorites, per-domain quality, Custom lookup, matching signatures, and the protected favorite handoff.
+- Choose a video destination from the notification; check rotation, canceling the picker, and a receiver that becomes unavailable. Confirm the receiving app opens once with readable video/audio after tapping Send.
 - Cancel a download, rotate during it, and test an unavailable link. Images should keep working without the add-on or network.
 - An add-on signed with another key must be rejected; update both release APKs in place to check signing continuity. Check the About/licenses page in both apps.
 

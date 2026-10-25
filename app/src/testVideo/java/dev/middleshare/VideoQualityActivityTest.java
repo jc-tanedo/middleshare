@@ -46,6 +46,8 @@ public class VideoQualityActivityTest {
 
     @Before
     public void setup() {
+        shadowOf(RuntimeEnvironment.getApplication())
+                .grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS);
         loads.set(0);
         stops.set(0);
         failNext.set(false);
@@ -183,6 +185,40 @@ public class VideoQualityActivityTest {
             controller.get().findViewById(R.id.video_custom).performClick();
             waitForFormats(controller.get());
             assertEquals(2, loads.get());
+        } finally {
+            controller.pause().stop().destroy();
+        }
+    }
+
+    @Test
+    public void notificationPermissionDenialStillStartsAConfirmedDownload() {
+        var app = RuntimeEnvironment.getApplication();
+        shadowOf(app).denyPermissions(android.Manifest.permission.POST_NOTIFICATIONS);
+        app.getSharedPreferences("video-notifications", android.content.Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .commit();
+        var controller =
+                Robolectric.buildActivity(FixtureActivity.class, incoming(VideoQuality.BEST))
+                        .setup();
+        try {
+            controller.get().findViewById(R.id.video_download).performClick();
+            assertEquals(
+                    "android.content.pm.action.REQUEST_PERMISSIONS",
+                    shadowOf(controller.get()).getNextStartedActivity().getAction());
+            assertNull(shadowOf(controller.get()).getNextStartedActivity());
+            controller
+                    .get()
+                    .onRequestPermissionsResult(
+                            42,
+                            new String[] {android.Manifest.permission.POST_NOTIFICATIONS},
+                            new int[] {android.content.pm.PackageManager.PERMISSION_DENIED});
+            assertEquals(
+                    VideoDownloadActivity.class.getName(),
+                    shadowOf(controller.get())
+                            .getNextStartedActivity()
+                            .getComponent()
+                            .getClassName());
         } finally {
             controller.pause().stop().destroy();
         }

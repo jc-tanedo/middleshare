@@ -103,6 +103,18 @@ final class Settings {
         prefs(context).edit().putString("format", format.name()).apply();
     }
 
+    static android.content.ComponentName getFavorite(Context context) {
+        String stored = prefs(context).getString("favorite_app", null);
+        return stored == null ? null : android.content.ComponentName.unflattenFromString(stored);
+    }
+
+    static void setFavorite(Context context, android.content.ComponentName target) {
+        prefs(context)
+                .edit()
+                .putString("favorite_app", target == null ? null : target.flattenToString())
+                .apply();
+    }
+
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences("conversion", Context.MODE_PRIVATE);
     }

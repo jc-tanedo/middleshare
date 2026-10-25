@@ -11,4 +11,8 @@
     <item name="credits_list" type="id" />
     <item name="video_destination" type="id" />
     <item name="video_destination_status" type="id" />
+    <item name="video_background" type="id" />
+    <item name="favorite_status" type="id" />
+    <item name="favorite_choose" type="id" />
+    <item name="favorite_clear" type="id" />
 </resources>

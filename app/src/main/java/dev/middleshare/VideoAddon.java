@@ -14,7 +14,8 @@ import android.widget.Toast;
 final class VideoAddon {
     static final String PACKAGE = "dev.middleshare.video";
     static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final int MIN_VERSION = 8;
+    static final int MIN_VERSION = 10;
+    static final String DESTINATION = "dev.middleshare.DESTINATION";
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String FORMAT = "dev.middleshare.FORMAT";
     static final String AUDIO = "dev.middleshare.AUDIO";
@@ -45,6 +46,12 @@ final class VideoAddon {
                 .putExtra(
                         QUALITY,
                         Settings.getVideoQuality(context, Settings.videoHost(link)).name());
+    }
+
+    static Intent favoriteShare(Context context, String link, ComponentName favorite) {
+        return share(context, link)
+                .setComponent(new ComponentName(PACKAGE, "dev.middleshare.FavoriteVideoActivity"))
+                .putExtra(DESTINATION, favorite.flattenToString());
     }
 
     static void releases(Activity activity) {

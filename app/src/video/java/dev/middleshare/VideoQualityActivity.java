@@ -15,6 +15,7 @@ import android.widget.TextView;
 /** The format lookup starts only when Custom becomes the selected option. */
 public class VideoQualityActivity extends Activity implements VideoFormatsJob.Listener {
     private String link;
+    private boolean notificationPrompted;
     private VideoQuality quality = VideoQuality.BEST;
     private VideoFormatsJob lookup;
     private TextView status;
@@ -193,9 +194,23 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
             next.putExtra(VideoAddon.FORMAT, format.id)
                     .putExtra(VideoAddon.AUDIO, format.needsAudio);
         }
+        String favorite = getIntent().getStringExtra(VideoAddon.DESTINATION);
+        if (favorite != null) next.putExtra(VideoAddon.DESTINATION, favorite);
+        if (VideoNotifications.shouldRequest(this) && !notificationPrompted) {
+            notificationPrompted = true;
+            VideoNotifications.markPrompted(this);
+            requestPermissions(new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 42);
+            return;
+        }
         download.setEnabled(false);
         startActivity(next);
         finish();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == 42) download();
     }
 
     @Override

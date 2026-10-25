@@ -28,7 +28,7 @@ final class ConversionJob {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean cancelled;
-    private Listener listener;
+    private final java.util.Set<Listener> listeners = new java.util.LinkedHashSet<>();
     final boolean video;
     private final VideoDownloader downloader;
     private String status;
@@ -108,8 +108,9 @@ final class ConversionJob {
                                                     main.post(
                                                             () -> {
                                                                 status = message;
-                                                                if (listener != null)
-                                                                    listener.onStatus(message);
+                                                                for (Listener observer :
+                                                                        new ArrayList<>(listeners))
+                                                                    observer.onStatus(message);
                                                             })));
                         }
                         for (int i = 0; i < inputs.size(); i++) {
@@ -119,7 +120,8 @@ final class ConversionJob {
                             main.post(
                                     () -> {
                                         current = progress;
-                                        if (listener != null) listener.onProgress(current, total);
+                                        for (Listener observer : new ArrayList<>(listeners))
+                                            observer.onProgress(current, total);
                                     });
                             results.add(ImageProcessor.process(app, inputs.get(i), format));
                         }
@@ -161,19 +163,51 @@ final class ConversionJob {
                 });
     }
 
-    void attach(Listener listener) {
-        this.listener = listener;
-        listener.onProgress(current, total);
-        if (status != null) listener.onStatus(status);
-        deliver();
+    private ConversionJob() {
+        video = true;
+        downloader = null;
+        total = 1;
+        completed = true;
+        executor.shutdown();
     }
 
-    void detach() {
-        listener = null;
+    static ConversionJob completedVideo(List<SharedFile> files, String failure) {
+        ConversionJob job = new ConversionJob();
+        job.outputs.addAll(files);
+        job.error = failure;
+        return job;
+    }
+
+    void attach(Listener listener) {
+        listeners.add(listener);
+        listener.onProgress(current, total);
+        if (status != null) listener.onStatus(status);
+        if (completed) listener.onComplete(this);
+    }
+
+    void detach(Listener listener) {
+        listeners.remove(listener);
+    }
+
+    private void detach() {
+        listeners.clear();
     }
 
     private void deliver() {
-        if (completed && listener != null) listener.onComplete(this);
+        if (completed)
+            for (Listener observer : new ArrayList<>(listeners)) observer.onComplete(this);
+    }
+
+    void interrupt(String message) {
+        if (completed) return;
+        cancelled = true;
+        if (downloader != null) downloader.cancel();
+        executor.shutdownNow();
+        delete(outputs);
+        outputs.clear();
+        error = message;
+        completed = true;
+        deliver();
     }
 
     void cancel() {

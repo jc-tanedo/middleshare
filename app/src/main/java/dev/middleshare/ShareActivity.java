@@ -42,6 +42,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
             destination = saved == null ? null : ComponentName.unflattenFromString(saved);
             selectingDestination = state.getBoolean("selecting_destination");
         }
+        if (state == null) destination = initialDestination();
         page = Ui.screen(this);
         page.setMinimumWidth(Ui.dp(this, 320));
         page.setMinimumHeight(Ui.dp(this, 260));
@@ -75,7 +76,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         Button cancel = Ui.button(this, R.string.cancel, false);
         cancel.setText(R.string.cancel);
         cancel.setAllCaps(false);
-        cancel.setOnClickListener(v -> finish());
+        cancel.setOnClickListener(v -> cancelShare());
         page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
         if (state != null && state.getBoolean("dispatched")) {
             finish();
@@ -84,7 +85,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         Object retained = getLastNonConfigurationInstance();
         if (retained instanceof ConversionJob) {
             job = (ConversionJob) retained;
-        } else {
+        } else if ((job = resumeVideoJob()) == null) {
             try {
                 String link = SharedLink.read(getIntent());
                 if (link != null && !BuildConfig.VIDEO_TOOLS) {
@@ -95,11 +96,15 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                 VideoQuality quality =
                         VideoQuality.parse(getIntent().getStringExtra(VideoAddon.QUALITY));
                 if (link != null && BuildConfig.VIDEO_TOOLS && !isVideoDownloadConfirmed()) {
-                    startActivity(
+                    Intent next =
                             new Intent()
                                     .setClassName(this, "dev.middleshare.VideoQualityActivity")
                                     .putExtra(Intent.EXTRA_TEXT, link)
-                                    .putExtra(VideoAddon.QUALITY, quality.name()));
+                                    .putExtra(VideoAddon.QUALITY, quality.name());
+                    ComponentName trusted = trustedVideoDestination();
+                    if (trusted != null)
+                        next.putExtra(VideoAddon.DESTINATION, trusted.flattenToString());
+                    startActivity(next);
                     finish();
                     return;
                 }
@@ -122,7 +127,64 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                                 + " again.");
             }
         }
-        if (job != null && job.video) updateDestination();
+        if (job != null && job.video) {
+            updateDestination();
+            if (backgroundVideo()) {
+                Button hide = Ui.button(this, R.string.continue_background, false);
+                hide.setId(R.id.video_background);
+                hide.setOnClickListener(v -> finish());
+                page.addView(hide, new LinearLayout.LayoutParams(-1, -2));
+            }
+        }
+    }
+
+    protected ConversionJob currentJob() {
+        return job;
+    }
+
+    protected ComponentName selectedDestination() {
+        return destination;
+    }
+
+    protected ComponentName initialDestination() {
+        return null;
+    }
+
+    protected ComponentName trustedVideoDestination() {
+        return null;
+    }
+
+    protected ConversionJob resumeVideoJob() {
+        return null;
+    }
+
+    protected boolean backgroundVideo() {
+        return false;
+    }
+
+    protected boolean needsReadyDestination() {
+        return false;
+    }
+
+    protected boolean canDispatchVideo() {
+        return true;
+    }
+
+    protected void destinationChanged(ComponentName target) {}
+
+    protected void shareDispatched() {}
+
+    protected void cancelShare() {
+        if (job != null) job.cancel();
+        finish();
+    }
+
+    protected void openDestinationPicker() {
+        chooseDestination();
+    }
+
+    protected Intent videoHandoff(String link) {
+        return VideoAddon.share(this, link);
     }
 
     ConversionJob newVideoJob(String link, VideoQuality quality, String format, boolean audio) {
@@ -149,7 +211,13 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         selectingDestination = true;
         updateDestination();
         try {
-            startActivityForResult(ShareDestinations.picker(this), PICK_DESTINATION);
+            startActivityForResult(
+                    ShareDestinations.picker(
+                            this,
+                            job.completed && !job.outputs.isEmpty()
+                                    ? job.outputs.get(0).mime
+                                    : "video/*"),
+                    PICK_DESTINATION);
         } catch (ActivityNotFoundException | SecurityException e) {
             selectingDestination = false;
             updateDestination();
@@ -158,7 +226,8 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                             R.string.destination_picker_unavailable,
                             android.widget.Toast.LENGTH_LONG)
                     .show();
-            if (job.completed) onComplete(job);
+            if (backgroundVideo()) finish();
+            else if (job.completed) onComplete(job);
         }
     }
 
@@ -170,7 +239,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     private void handOffVideo() {
         if (VideoAddon.available(this)) {
             try {
-                startActivity(VideoAddon.share(this, pendingLink));
+                startActivity(videoHandoff(pendingLink));
                 finish();
                 return;
             } catch (ActivityNotFoundException | SecurityException ignored) {
@@ -205,7 +274,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onPause() {
         resumed = false;
-        if (job != null) job.detach();
+        if (job != null) job.detach(this);
         super.onPause();
     }
 
@@ -225,8 +294,8 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onDestroy() {
         if (job != null) {
-            job.detach();
-            if (!isChangingConfigurations()) job.cancel();
+            job.detach(this);
+            if (!isChangingConfigurations() && !backgroundVideo()) job.cancel();
         }
         super.onDestroy();
     }
@@ -259,12 +328,18 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
             showError("There are no files to share.");
             return;
         }
+        if (result.video && !canDispatchVideo()) return;
+        if (result.video && needsReadyDestination() && destination == null) {
+            chooseDestination();
+            return;
+        }
         if (destination != null) {
             Intent targeted = ShareDestinations.outgoing(this, result.outputs, destination);
             if (targeted != null) {
                 try {
                     startActivityForResult(targeted, 20);
                     result.dispatched = true;
+                    shareDispatched();
                     return;
                 } catch (ActivityNotFoundException | SecurityException ignored) {
                     // The app may have changed since the user selected it.
@@ -277,9 +352,14 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                             android.widget.Toast.LENGTH_LONG)
                     .show();
         }
+        if (result.video && needsReadyDestination()) {
+            chooseDestination();
+            return;
+        }
         try {
             startActivityForResult(ShareIntents.chooser(this, result.outputs), 20);
             result.dispatched = true;
+            shareDispatched();
         } catch (ActivityNotFoundException | SecurityException e) {
             showError("No app is available to receive this file.");
         }
@@ -296,7 +376,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         Button close = Ui.button(this, R.string.close, false);
         close.setText(R.string.close);
         close.setAllCaps(false);
-        close.setOnClickListener(v -> finish());
+        close.setOnClickListener(v -> cancelShare());
         page.addView(close, new LinearLayout.LayoutParams(-1, -2));
     }
 
@@ -309,6 +389,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                     resultCode == RESULT_OK && data != null ? data.getComponent() : null;
             if (selected != null && ShareDestinations.available(this, selected))
                 destination = selected;
+            destinationChanged(destination);
             updateDestination();
             if (job != null && job.completed && resumed) onComplete(job);
         } else if (requestCode == 20) finish();
