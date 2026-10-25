@@ -35,7 +35,7 @@ Android may ask you to allow installation from your browser or file manager. `SH
 
 1. Share an image or one supported video link to **MiddleShare**.
 2. WebP converts using your saved format. For a video, choose a quality and tap **Download video**.
-3. Pick the app that should receive the file.
+3. Pick the app that should receive the file. For videos, **Choose destination** during the download to open that app with the finished video automatically.
 
 Open MiddleShare to choose **JPEG or PNG**, set video quality, manage **Site preferences**, or change the theme. Video defaults to **Best**, letting yt-dlp choose. **Mobile**, **Standard**, **Full**, and **Custom** are also available; Custom loads formats only when selected.
 

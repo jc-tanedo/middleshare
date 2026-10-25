@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="video/*" />
+        </intent>
+    </queries>
     <uses-permission android:name="android.permission.INTERNET" />
     <application>
         <activity android:name=".VideoDownloadActivity" android:theme="@style/ShareSheetTheme" android:exported="false" android:excludeFromRecents="true" />

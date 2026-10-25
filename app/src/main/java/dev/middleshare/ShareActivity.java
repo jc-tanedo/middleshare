@@ -2,6 +2,7 @@ package dev.middleshare;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -17,6 +18,12 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     private LinearLayout page;
     private boolean showingError;
     private String pendingLink;
+    static final int PICK_DESTINATION = 21;
+    private ComponentName destination;
+    private boolean selectingDestination;
+    private boolean resumed;
+    private Button destinationButton;
+    private TextView destinationStatus;
 
     @Override
     protected void attachBaseContext(android.content.Context base) {
@@ -29,6 +36,11 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         if (getWindow() != null) {
             getWindow().setGravity(android.view.Gravity.BOTTOM);
             getWindow().setLayout(-1, -2);
+        }
+        if (state != null) {
+            String saved = state.getString("destination");
+            destination = saved == null ? null : ComponentName.unflattenFromString(saved);
+            selectingDestination = state.getBoolean("selecting_destination");
         }
         page = Ui.screen(this);
         page.setMinimumWidth(Ui.dp(this, 320));
@@ -47,14 +59,19 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         spinnerParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
         page.addView(spinner, spinnerParams);
         Ui.gap(this, page, 20);
-        page.addView(
-                Ui.text(
-                        this,
-                        "Your share sheet opens when the file is ready. Images convert locally;"
-                                + " video links download from the source site.",
-                        16,
-                        Ui.MUTED,
-                        false));
+        page.addView(Ui.text(this, getString(R.string.processing_details), 16, Ui.MUTED, false));
+        destinationButton = Ui.button(this, R.string.choose_destination, true);
+        destinationButton.setId(R.id.video_destination);
+        destinationButton.setVisibility(android.view.View.GONE);
+        destinationButton.setOnClickListener(v -> chooseDestination());
+        page.addView(destinationButton, new LinearLayout.LayoutParams(-1, -2));
+        destinationStatus = Ui.text(this, "", 13, Ui.MUTED, false);
+        destinationStatus.setId(R.id.video_destination_status);
+        destinationStatus.setVisibility(android.view.View.GONE);
+        destinationStatus.setAccessibilityLiveRegion(
+                android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        page.addView(destinationStatus);
+        Ui.gap(this, page, 8);
         Button cancel = Ui.button(this, R.string.cancel, false);
         cancel.setText(R.string.cancel);
         cancel.setAllCaps(false);
@@ -88,8 +105,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                 }
                 job =
                         link != null
-                                ? new ConversionJob(
-                                        getApplicationContext(),
+                                ? newVideoJob(
                                         link,
                                         quality,
                                         getIntent().getStringExtra(VideoAddon.FORMAT),
@@ -105,6 +121,44 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                         "The shared payload is invalid. Please try sharing the image or video link"
                                 + " again.");
             }
+        }
+        if (job != null && job.video) updateDestination();
+    }
+
+    ConversionJob newVideoJob(String link, VideoQuality quality, String format, boolean audio) {
+        return new ConversionJob(getApplicationContext(), link, quality, format, audio);
+    }
+
+    private void updateDestination() {
+        destinationButton.setVisibility(android.view.View.VISIBLE);
+        destinationStatus.setVisibility(android.view.View.VISIBLE);
+        destinationButton.setEnabled(!selectingDestination);
+        destinationButton.setText(
+                destination == null ? R.string.choose_destination : R.string.change_destination);
+        destinationStatus.setText(
+                destination == null
+                        ? getString(R.string.destination_hint)
+                        : getString(
+                                R.string.destination_ready,
+                                ShareDestinations.label(this, destination)));
+    }
+
+    private void chooseDestination() {
+        if (job == null || !job.video || selectingDestination || job.dispatched || showingError)
+            return;
+        selectingDestination = true;
+        updateDestination();
+        try {
+            startActivityForResult(ShareDestinations.picker(this), PICK_DESTINATION);
+        } catch (ActivityNotFoundException | SecurityException e) {
+            selectingDestination = false;
+            updateDestination();
+            android.widget.Toast.makeText(
+                            this,
+                            R.string.destination_picker_unavailable,
+                            android.widget.Toast.LENGTH_LONG)
+                    .show();
+            if (job.completed) onComplete(job);
         }
     }
 
@@ -144,11 +198,13 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onResume() {
         super.onResume();
+        resumed = true;
         if (job != null) job.attach(this);
     }
 
     @Override
     protected void onPause() {
+        resumed = false;
         if (job != null) job.detach();
         super.onPause();
     }
@@ -161,6 +217,8 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onSaveInstanceState(Bundle state) {
         state.putBoolean("dispatched", job != null && job.dispatched);
+        state.putString("destination", destination == null ? null : destination.flattenToString());
+        state.putBoolean("selecting_destination", selectingDestination);
         super.onSaveInstanceState(state);
     }
 
@@ -192,7 +250,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
 
     @Override
     public void onComplete(ConversionJob result) {
-        if (result.dispatched || isFinishing()) return;
+        if (result.dispatched || isFinishing() || !resumed || selectingDestination) return;
         if (result.error != null) {
             showError(result.error);
             return;
@@ -201,10 +259,28 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
             showError("There are no files to share.");
             return;
         }
+        if (destination != null) {
+            Intent targeted = ShareDestinations.outgoing(this, result.outputs, destination);
+            if (targeted != null) {
+                try {
+                    startActivityForResult(targeted, 20);
+                    result.dispatched = true;
+                    return;
+                } catch (ActivityNotFoundException | SecurityException ignored) {
+                    // The app may have changed since the user selected it.
+                }
+            }
+            destination = null;
+            android.widget.Toast.makeText(
+                            this,
+                            R.string.destination_unavailable,
+                            android.widget.Toast.LENGTH_LONG)
+                    .show();
+        }
         try {
             startActivityForResult(ShareIntents.chooser(this, result.outputs), 20);
             result.dispatched = true;
-        } catch (ActivityNotFoundException e) {
+        } catch (ActivityNotFoundException | SecurityException e) {
             showError("No app is available to receive this file.");
         }
     }
@@ -227,6 +303,14 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 20) finish();
+        if (requestCode == PICK_DESTINATION) {
+            selectingDestination = false;
+            ComponentName selected =
+                    resultCode == RESULT_OK && data != null ? data.getComponent() : null;
+            if (selected != null && ShareDestinations.available(this, selected))
+                destination = selected;
+            updateDestination();
+            if (job != null && job.completed && resumed) onComplete(job);
+        } else if (requestCode == 20) finish();
     }
 }

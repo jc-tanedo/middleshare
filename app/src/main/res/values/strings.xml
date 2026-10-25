@@ -30,4 +30,11 @@
     <string name="edit_site">Edit site</string>
     <string name="save">Save</string>
     <string name="remove">Remove</string>
+    <string name="choose_destination">Choose destination</string>
+    <string name="change_destination">Change destination</string>
+    <string name="destination_hint">Choose an app while the video downloads, or wait for the share sheet.</string>
+    <string name="destination_ready">We’ll open %1$s with the video when it’s ready. Finish sending in that app.</string>
+    <string name="destination_picker_unavailable">App selection is unavailable. The share sheet will open when your video is ready.</string>
+    <string name="destination_unavailable">The selected app can’t receive this video. Choose another app from the share sheet.</string>
+    <string name="processing_details">Images convert locally; video links download from the source site.</string>
 </resources>

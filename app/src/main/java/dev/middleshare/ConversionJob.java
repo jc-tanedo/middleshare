@@ -36,7 +36,7 @@ final class ConversionJob {
     private final int total;
 
     ConversionJob(Context context, List<Uri> inputs, Settings.Format format) {
-        this(context, inputs, format, null, VideoQuality.BEST, null, false);
+        this(context, inputs, format, null, VideoQuality.BEST, null, false, null);
     }
 
     ConversionJob(
@@ -52,7 +52,26 @@ final class ConversionJob {
                 link,
                 quality,
                 customId,
-                needsAudio);
+                needsAudio,
+                null);
+    }
+
+    ConversionJob(
+            Context context,
+            String link,
+            VideoQuality quality,
+            String customId,
+            boolean needsAudio,
+            VideoDownloader downloader) {
+        this(
+                context,
+                java.util.Collections.emptyList(),
+                Settings.Format.JPEG,
+                link,
+                quality,
+                customId,
+                needsAudio,
+                downloader);
     }
 
     private ConversionJob(
@@ -62,10 +81,14 @@ final class ConversionJob {
             String link,
             VideoQuality quality,
             String customId,
-            boolean needsAudio) {
+            boolean needsAudio,
+            VideoDownloader suppliedDownloader) {
         Context app = context.getApplicationContext();
         video = link != null;
-        downloader = video ? new VideoDownloader() : null;
+        downloader =
+                video
+                        ? (suppliedDownloader == null ? new VideoDownloader() : suppliedDownloader)
+                        : null;
         total = video ? 1 : inputs.size();
         executor.execute(
                 () -> {

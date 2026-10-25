@@ -27,6 +27,14 @@ A Custom default prompts for a new choice on each shared link. Exact format IDs 
 
 Use matching main/add-on APKs from release 0.6.1 or later to include the download-confirmation security fix. The main app rejects older add-ons.
 
+## Choose a destination while downloading
+
+Tap **Download video**, then **Choose destination** in the progress drawer. Android lets you pick an app while the download continues; the app receives the file only after it is complete. You can change the destination before completion. Canceling the picker keeps any previous selection, or uses the normal share sheet if no app has been selected.
+
+The selection is scoped to the current share and survives rotation. If you leave MiddleShare or keep the picker open, handing over waits until you return and finish choosing. If the chosen app is unavailable or cannot receive the finished format, the usual share sheet opens instead. Choosing a destination is optional.
+
+This selects an **app**, not a contact or conversation. Finish choosing the recipient and sending inside that app. No incomplete file or temporary read grant is sent while choosing.
+
 ## Download behavior
 
 - Downloads one video; playlist links are limited to their first entry. Live/upcoming streams are excluded.

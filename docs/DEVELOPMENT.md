@@ -33,6 +33,8 @@ The small single-module project uses Android source sets to keep the video runti
 
 The exported `ShareActivity` accepts incoming shares but cannot treat extras as proof of user confirmation. Only `VideoDownloadActivity`, declared `exported=false`, starts a confirmed video download. New handoff changes must preserve this boundary and the add-on package/version/signature checks.
 
+The video progress drawer can open Android's activity picker with a MIME-only share intent. `ShareDestinations` validates the returned component against exported, enabled video receivers and rechecks the finished MIME type before dispatch. Selection lives in activity state, not incoming share extras or saved preferences. Completed jobs defer dispatch while the picker is open or the activity is paused.
+
 ## Formatting
 
 Java follows Google Java Format 1.24.0 in AOSP mode (four-space indentation). Use the formatter's `--aosp` option when formatting Java files. `.editorconfig` defines the shared whitespace conventions. Do not reformat vendored payloads, upstream license notices, or generated attribution files by hand.

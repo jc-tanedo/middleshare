@@ -9,4 +9,6 @@
     <item name="video_retry" type="id" />
     <item name="about_button" type="id" />
     <item name="credits_list" type="id" />
+    <item name="video_destination" type="id" />
+    <item name="video_destination_status" type="id" />
 </resources>
