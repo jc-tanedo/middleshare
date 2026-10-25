@@ -175,10 +175,10 @@ public class BackgroundVideoTest {
             Notification progress = service.notification(task);
             assertEquals(VideoDownloadService.CHANNEL, progress.getChannelId());
             assertTrue(progress.extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE));
-            assertEquals(2, progress.actions.length);
+            assertEquals(1, progress.actions.length);
             task.status = "Downloading video… 50%";
             assertEquals(50, service.notification(task).extras.getInt(Notification.EXTRA_PROGRESS));
-            Intent cancel = shadowOf(progress.actions[1].actionIntent).getSavedIntent();
+            Intent cancel = shadowOf(progress.actions[0].actionIntent).getSavedIntent();
             assertEquals(VideoDownloadService.CANCEL, cancel.getAction());
             service.onStartCommand(cancel, 0, 2);
             assertTrue(task.removed);
@@ -246,6 +246,36 @@ public class BackgroundVideoTest {
     }
 
     @Test
+    public void oldAdvanceDestinationIsIgnoredWhenRestoringAReadyVideo() throws Exception {
+        VideoTransfers.Task task = task(TARGET);
+        try {
+            complete(task);
+            File file =
+                    new File(context.getNoBackupFilesDir(), "video-transfers/" + task.id + ".json");
+            var data =
+                    new org.json.JSONObject(
+                            new String(
+                                    Files.readAllBytes(file.toPath()),
+                                    java.nio.charset.StandardCharsets.UTF_8));
+            data.remove("favorite");
+            data.put("destination", TARGET.flattenToString());
+            Files.write(
+                    file.toPath(),
+                    data.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            var field = VideoTransfers.class.getDeclaredField("tasks");
+            field.setAccessible(true);
+            ((java.util.Map<?, ?>) field.get(null)).clear();
+            var restored = VideoTransfers.find(context, task.id);
+            assertNotNull(restored);
+            assertNull(restored.destination);
+            assertNull(restored.job.error);
+            VideoTransfers.remove(restored, false);
+        } finally {
+            VideoTransfers.remove(task, false);
+        }
+    }
+
+    @Test
     public void runningMetadataRecoveredAfterProcessLossBecomesInterruptedInsteadOfRestarting()
             throws Exception {
         VideoTransfers.Task task = task(null);
@@ -265,44 +295,128 @@ public class BackgroundVideoTest {
     }
 
     @Test
-    public void cancelingReadyAppSelectionKeepsTheVideoAndNotification() throws Exception {
+    public void drawerStaysOpenUntilCompletionAndUsesNativeShareSheet() throws Exception {
+        VideoTransfers.Task task = task(null);
+        var controller =
+                Robolectric.buildActivity(
+                                VideoDownloadActivity.class,
+                                new Intent(context, VideoDownloadActivity.class)
+                                        .setAction(Intent.ACTION_SEND)
+                                        .putExtra(VideoDownloadActivity.TRANSFER, task.id))
+                        .setup();
+        try {
+            assertFalse(controller.get().isFinishing());
+            assertNotNull(controller.get().findViewById(R.id.video_background));
+            assertNull(shadowOf(controller.get()).getNextStartedActivity());
+            controller.recreate();
+            assertFalse(controller.get().isFinishing());
+            complete(task);
+            assertNativeShare(shadowOf(controller.get()).getNextStartedActivity());
+            controller.pause().resume();
+            assertNull(shadowOf(controller.get()).getNextStartedActivity());
+            assertNotNull(VideoTransfers.find(context, task.id));
+        } finally {
+            controller.pause().stop().destroy();
+            VideoTransfers.remove(task, false);
+        }
+    }
+
+    @Test
+    @Config(sdk = {28, 35})
+    public void minimizedDownloadWaitsForFinishedTapAndNativeShareCanBeRetried() throws Exception {
         VideoTransfers.Task task = task(null);
         var serviceController = Robolectric.buildService(VideoDownloadService.class).create();
+        serviceController
+                .get()
+                .onStartCommand(
+                        new Intent(context, VideoDownloadService.class)
+                                .setAction(VideoDownloadService.START)
+                                .putExtra(VideoDownloadActivity.TRANSFER, task.id),
+                        0,
+                        1);
+        var drawer =
+                Robolectric.buildActivity(
+                                VideoDownloadActivity.class,
+                                new Intent(context, VideoDownloadActivity.class)
+                                        .setAction(Intent.ACTION_SEND)
+                                        .putExtra(VideoDownloadActivity.TRANSFER, task.id))
+                        .setup();
         try {
-            serviceController
-                    .get()
-                    .onStartCommand(
-                            new Intent(context, VideoDownloadService.class)
-                                    .setAction(VideoDownloadService.START)
-                                    .putExtra(VideoDownloadActivity.TRANSFER, task.id),
-                            0,
-                            1);
+            assertFalse(drawer.get().isFinishing());
+            drawer.get().findViewById(R.id.video_background).performClick();
+            assertTrue(drawer.get().isFinishing());
+            drawer.pause().stop().destroy();
             complete(task);
-            var controller =
-                    Robolectric.buildActivity(
-                                    VideoDownloadActivity.class,
-                                    new Intent(context, VideoDownloadActivity.class)
-                                            .setAction(VideoDownloadActivity.SEND_READY)
-                                            .putExtra(VideoDownloadActivity.TRANSFER, task.id))
-                            .setup();
+            assertNull(shadowOf(drawer.get()).getNextStartedActivity());
+            Notification ready =
+                    shadowOf(context.getSystemService(NotificationManager.class))
+                            .getNotification(task.notificationId);
+            assertNotNull(ready);
+            assertEquals(
+                    context.getString(R.string.transfer_ready),
+                    ready.extras.getString(Notification.EXTRA_TITLE));
+            Intent tap = shadowOf(ready.contentIntent).getSavedIntent();
+            // Restore only ready metadata, as if Android reclaimed the minimized process.
+            var field = VideoTransfers.class.getDeclaredField("tasks");
+            field.setAccessible(true);
+            ((java.util.Map<?, ?>) field.get(null)).clear();
+            for (int attempt = 0; attempt < 2; attempt++) {
+                var share = Robolectric.buildActivity(VideoDownloadActivity.class, tap).setup();
+                try {
+                    assertNativeShare(shadowOf(share.get()).getNextStartedActivity());
+                    share.pause();
+                    share.get().onActivityResult(20, android.app.Activity.RESULT_CANCELED, null);
+                    assertTrue(share.get().isFinishing());
+                    assertNotNull(VideoTransfers.find(context, task.id));
+                    assertNotNull(
+                            shadowOf(context.getSystemService(NotificationManager.class))
+                                    .getNotification(task.notificationId));
+                    assertTrue(task.job.outputs.get(0).file.isFile());
+                } finally {
+                    share.stop().destroy();
+                }
+            }
+            var sent = Robolectric.buildActivity(VideoDownloadActivity.class, tap).setup();
             try {
-                assertEquals(
-                        Intent.ACTION_PICK_ACTIVITY,
-                        shadowOf(controller.get()).getNextStartedActivity().getAction());
-                controller
-                        .get()
-                        .onActivityResult(
-                                ShareActivity.PICK_DESTINATION,
-                                android.app.Activity.RESULT_CANCELED,
-                                null);
-                assertTrue(controller.get().isFinishing());
-                assertFalse(task.job.dispatched);
-                assertNotNull(VideoTransfers.find(context, task.id));
-                assertNotNull(
+                Intent chooser = shadowOf(sent.get()).getNextStartedActivity();
+                android.content.IntentSender chosen =
+                        chooser.getParcelableExtra(Intent.EXTRA_CHOSEN_COMPONENT_INTENT_SENDER);
+                // Android 15 can report the newer ChooserResult through a different extra.
+                if (chosen == null)
+                    chosen = chooser.getParcelableExtra(Intent.EXTRA_CHOOSER_RESULT_INTENT_SENDER);
+                assertNotNull(chosen);
+                // Exercise the matching PendingIntent: IntentSender's API 35 binder transport
+                // is not implemented by this Robolectric version.
+                var callback =
+                        android.app.PendingIntent.getBroadcast(
+                                context,
+                                0,
+                                new Intent(context, VideoShareReceiver.class)
+                                        .setData(
+                                                android.net.Uri.parse(
+                                                        "middleshare://transfer/"
+                                                                + task.id
+                                                                + "/chosen")),
+                                android.app.PendingIntent.FLAG_NO_CREATE
+                                        | android.app.PendingIntent.FLAG_ONE_SHOT
+                                        | android.app.PendingIntent.FLAG_IMMUTABLE);
+                assertNotNull(callback);
+                assertEquals(callback.getIntentSender(), chosen);
+                assertTrue(shadowOf(callback).isImmutable());
+                callback.send();
+                shadowOf(Looper.getMainLooper()).idle();
+                assertNull(VideoTransfers.find(context, task.id));
+                assertNull(
                         shadowOf(context.getSystemService(NotificationManager.class))
                                 .getNotification(task.notificationId));
+                assertTrue(task.job.outputs.get(0).file.isFile());
+                assertFalse(
+                        context.getPackageManager()
+                                .getReceiverInfo(
+                                        new ComponentName(context, VideoShareReceiver.class), 0)
+                                .exported);
             } finally {
-                controller.pause().stop().destroy();
+                sent.pause().stop().destroy();
             }
         } finally {
             VideoTransfers.remove(task, false);
@@ -310,90 +424,18 @@ public class BackgroundVideoTest {
         }
     }
 
-    @Test
-    public void readyVideoSelectionReturnsFromPrivatePickerAndHandsOffAfterResume()
-            throws Exception {
-        VideoTransfers.Task task = task(null);
-        try {
-            complete(task);
-            // Also exercise the saved-ready path used when Android has reclaimed the process.
-            var field = VideoTransfers.class.getDeclaredField("tasks");
-            field.setAccessible(true);
-            ((java.util.Map<?, ?>) field.get(null)).clear();
-            VideoTransfers.Task restored = VideoTransfers.find(context, task.id);
-            VideoNotifications.publish(context, restored);
-            var controller =
-                    Robolectric.buildActivity(
-                                    VideoDownloadActivity.class,
-                                    new Intent(context, VideoDownloadActivity.class)
-                                            .setAction(VideoDownloadActivity.SEND_READY)
-                                            .putExtra(VideoDownloadActivity.TRANSFER, task.id))
-                            .setup();
-            try {
-                Intent pickerIntent = shadowOf(controller.get()).getNextStartedActivity();
-                assertEquals(
-                        DestinationPickerActivity.class.getName(),
-                        pickerIntent.getComponent().getClassName());
-                Intent prototype = pickerIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-                assertEquals("video/mp4", prototype.getType());
-                assertNull(prototype.getClipData());
-                controller.pause();
-                var picker =
-                        Robolectric.buildActivity(DestinationPickerActivity.class, pickerIntent)
-                                .setup();
-                try {
-                    android.widget.Button receiver =
-                            findButton(picker.get().getWindow().getDecorView(), "Receiver");
-                    assertNotNull(receiver);
-                    receiver.performClick();
-                    assertTrue(picker.get().isFinishing());
-                    assertEquals(
-                            android.app.Activity.RESULT_OK, shadowOf(picker.get()).getResultCode());
-                    controller
-                            .get()
-                            .onActivityResult(
-                                    ShareActivity.PICK_DESTINATION,
-                                    shadowOf(picker.get()).getResultCode(),
-                                    shadowOf(picker.get()).getResultIntent());
-                    assertFalse(controller.get().isFinishing());
-                    assertFalse(restored.job.dispatched);
-                    controller.resume();
-                    Intent outgoing = shadowOf(controller.get()).getNextStartedActivity();
-                    assertNotNull(outgoing);
-                    assertEquals(TARGET, outgoing.getComponent());
-                    assertEquals("video/mp4", outgoing.getType());
-                    assertNotNull(outgoing.getParcelableExtra(Intent.EXTRA_STREAM));
-                    assertNotNull(outgoing.getClipData());
-                    assertTrue((outgoing.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
-                    assertNull(VideoTransfers.find(context, task.id));
-                    assertNull(
-                            shadowOf(context.getSystemService(NotificationManager.class))
-                                    .getNotification(task.notificationId));
-                    assertTrue(restored.job.outputs.get(0).file.isFile());
-                } finally {
-                    picker.pause().stop().destroy();
-                }
-            } finally {
-                controller.pause().stop().destroy();
-                VideoTransfers.remove(restored, false);
-            }
-        } finally {
-            VideoTransfers.remove(task, false);
-        }
-    }
-
-    private static android.widget.Button findButton(android.view.View view, String label) {
-        if (view instanceof android.widget.Button
-                && label.contentEquals(((android.widget.Button) view).getText()))
-            return (android.widget.Button) view;
-        if (view instanceof android.view.ViewGroup) {
-            var group = (android.view.ViewGroup) view;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                var found = findButton(group.getChildAt(i), label);
-                if (found != null) return found;
-            }
-        }
-        return null;
+    private static void assertNativeShare(Intent chooser) {
+        assertNotNull(chooser);
+        assertEquals(Intent.ACTION_CHOOSER, chooser.getAction());
+        assertNull(chooser.getComponent());
+        Intent payload = chooser.getParcelableExtra(Intent.EXTRA_INTENT);
+        assertEquals(Intent.ACTION_SEND, payload.getAction());
+        assertEquals("video/mp4", payload.getType());
+        assertNull(payload.getComponent());
+        assertNull(payload.getPackage());
+        assertNotNull(payload.getParcelableExtra(Intent.EXTRA_STREAM));
+        assertNotNull(payload.getClipData());
+        assertTrue((payload.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
     }
 
     @Test

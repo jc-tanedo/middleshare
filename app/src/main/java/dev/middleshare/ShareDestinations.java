@@ -8,23 +8,8 @@ import android.content.pm.ResolveInfo;
 
 import java.util.List;
 
-/** Selects an app without sharing an unfinished file or launching the receiver. */
+/** Validates explicit favorite receivers against the finished payload. */
 final class ShareDestinations {
-    private static Intent videoIntent() {
-        return new Intent(Intent.ACTION_SEND).setType("video/*");
-    }
-
-    static Intent picker(Context context) {
-        return picker(context, "video/*");
-    }
-
-    static Intent picker(Context context, String mime) {
-        return new Intent(Intent.ACTION_PICK_ACTIVITY)
-                .setClass(context, DestinationPickerActivity.class)
-                .putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_SEND).setType(mime))
-                .putExtra(Intent.EXTRA_TITLE, context.getString(R.string.choose_destination));
-    }
-
     static boolean available(Context context, ComponentName target, Intent payload) {
         if (target == null) return false;
         if (target.getPackageName().equals("dev.middleshare")
@@ -54,10 +39,6 @@ final class ShareDestinations {
                                 == PackageManager.PERMISSION_GRANTED);
     }
 
-    static boolean available(Context context, ComponentName target) {
-        return available(context, target, videoIntent());
-    }
-
     static String label(Context context, ComponentName target) {
         try {
             return context.getPackageManager()
@@ -71,7 +52,6 @@ final class ShareDestinations {
 
     static Intent outgoing(Context context, List<SharedFile> files, ComponentName target) {
         Intent payload = ShareIntents.outgoing(files);
-        // The finished MIME type may differ from the general video type used by the picker.
         if (!available(context, target, payload)) return null;
         return payload.setComponent(target);
     }

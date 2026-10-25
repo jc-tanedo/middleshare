@@ -59,7 +59,7 @@ final class VideoTransfers {
                                 .put("notification", notificationId)
                                 .put("complete", job != null && job.completed)
                                 .put(
-                                        "destination",
+                                        "favorite",
                                         destination == null
                                                 ? JSONObject.NULL
                                                 : destination.flattenToString())
@@ -79,12 +79,6 @@ final class VideoTransfers {
                 if (stream != null) file.failWrite(stream);
                 throw new IOException("Cannot save download state.", error);
             }
-        }
-
-        void destination(ComponentName target) {
-            destination = target;
-            saveAfterUpdate();
-            notifyObservers(this);
         }
 
         private void saveAfterUpdate() {
@@ -166,7 +160,9 @@ final class VideoTransfers {
                             new String(new AtomicFile(file).readFully(), StandardCharsets.UTF_8));
             if (!id.equals(data.getString("id"))) return null;
             Task task = new Task(context, id, data.getInt("notification"));
-            String target = data.isNull("destination") ? null : data.getString("destination");
+            // Ignore legacy advance selections; only the explicit favorite shortcut persists a
+            // target.
+            String target = data.isNull("favorite") ? null : data.getString("favorite");
             task.destination = target == null ? null : ComponentName.unflattenFromString(target);
             String error = data.isNull("error") ? null : data.getString("error");
             if (!data.getBoolean("complete"))

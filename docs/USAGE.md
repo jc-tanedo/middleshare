@@ -25,23 +25,25 @@ Presets start without a separate format-list lookup. Merely opening settings or 
 
 A Custom default prompts for a new choice on each shared link. Exact format IDs are specific to that link and are never saved in preferences. Results are reused within the share, including across rotation; leaving Custom cancels an unfinished lookup. If loading fails, tap Custom again to retry or use a preset. Resolution caps apply when the source reports dimensions; sources with unknown resolution may pass through. All choices retain the 256 MiB final-file, temporary-storage, and download-time limits below. Full is not an unlimited file-size setting.
 
-Use matching main/add-on APKs from release 0.8.1 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
+Use matching main/add-on APKs from release 0.8.2 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
 
-## Background downloads and destinations
+## Background downloads
 
-After **Download video**, an Android foreground service owns the download. With notifications enabled, the drawer closes and an ongoing notification shows progress, **Choose destination**, and **Cancel**. You can switch apps or close the drawer. On Android 13+, the video add-on asks for notification permission; if you decline or disable the channel, a progress drawer remains available instead. The add-on's home screen also has **View downloads** and notification settings.
+After **Download video**, the progress drawer stays open while an Android foreground service owns the download. When it finishes with the drawer visible, Android’s native share sheet opens with the finished file. There is no separate destination picker or advance target selection.
 
-Choose a destination through the ongoing notification. No unfinished file or URI read grant is sent to that app. When the video is complete, the notification becomes **Video ready to send**. Tap **Send** to open your chosen app, or pick a compatible app if no destination was selected or it is no longer available. Android restricts automatic app launches from the background, so completion does not pop another app over what you are doing.
+Tap **Minimize** to close the drawer and let the download continue. An ongoing notification shows progress and **Cancel**. When complete, it becomes **Finished**: tap it or its **Share** action to open Android’s native share sheet. The receiving app and conversation are selected there. Completion in the background never launches another app over what you are doing.
 
-Ready notifications remain until handoff or **Discard**. Handoff clears the notification but retains the cached file for the receiving app to read. This selects an **app**, not a contact or conversation: finish choosing the recipient and sending inside that app. MiddleShare cannot observe the final Send action in another app.
+On Android 13+, the video add-on asks for notification permission. If you decline or disable the channel, the drawer still works; minimized files remain reachable through **View downloads** on the add-on home screen. That screen also links to notification settings.
 
-The selected destination and ready-file metadata are saved privately without the source URL. Rotation and closing the drawer do not restart a download. A force stop, reboot, service timeout, or process loss can interrupt it; interrupted records explain that you need to share the link again. There is no automatic restart or resumable download queue. Android may allow users to dismiss ongoing notifications; pending work remains accessible in **View downloads**.
+Opening the native share sheet retains the finished download and its notification so you can retry after canceling. Selecting a share target clears the notification and pending record; the cached file remains readable by the receiving app. Direct favorite handoff also clears its notification. Use **Discard** when you no longer need a pending file. MiddleShare cannot observe the final Send action inside another app. Files and completed records expire after 24 hours, and Android may evict cached files sooner.
+
+Ready-file metadata and the optional favorite are saved privately without the source URL. Rotation and minimizing do not restart a download. A force stop, reboot, service timeout, or process loss can interrupt it; interrupted records explain that you need to share the link again. There is no automatic restart or resumable download queue. Android may allow users to dismiss ongoing notifications; pending work remains accessible in **View downloads**.
 
 ## Favorite share shortcut
 
 In the main app, choose **Favorite app**. The app picker includes compatible image/video receivers and excludes MiddleShare itself. You can change or clear the favorite at any time.
 
-Share to **MiddleShare Favorite** to process images and open the configured app without another destination selection. Video links use the configured site's quality (or global fallback) and saved favorite automatically; Custom still opens the per-link format picker. Video downloads finish through the ready notification as above. If no favorite is set, the shortcut uses the ordinary share flow. If the favorite cannot receive a particular image/batch/video format, choose another compatible receiver.
+Share to **MiddleShare Favorite** to process images and open the configured app without another destination selection. Video links use the configured site's quality (or global fallback) and saved favorite automatically; Custom still opens the per-link format picker. The drawer stays open by default; minimized video downloads finish through the notification as above. If no favorite is set, the shortcut uses the ordinary share flow. If the favorite cannot receive a particular image/batch/video format, choose another compatible receiver.
 
 The favorite is a local app/activity preference. Sender-supplied destination extras are ignored by public receivers. The main app passes its saved favorite to the video add-on through a signature-permission-protected activity; use APKs from the same signed release.
 

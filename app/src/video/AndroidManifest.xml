@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application>
+        <receiver android:name=".VideoShareReceiver" android:exported="false" />
         <activity android:name=".VideoTransfersActivity" android:exported="false" />
         <service android:name=".VideoDownloadService" android:exported="false" android:foregroundServiceType="dataSync" />
         <activity android:name=".FavoriteVideoActivity" android:theme="@style/ShareSheetTheme" android:exported="true" android:permission="dev.middleshare.permission.SHARE_FAVORITE" android:excludeFromRecents="true" />

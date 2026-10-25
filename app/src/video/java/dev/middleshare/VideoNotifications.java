@@ -145,12 +145,6 @@ final class VideoNotifications {
             else builder.setProgress(0, 0, true);
             builder.addAction(
                     new Notification.Action.Builder(
-                                    null,
-                                    context.getString(R.string.choose_destination),
-                                    open(context, task, VideoDownloadActivity.PICK))
-                            .build());
-            builder.addAction(
-                    new Notification.Action.Builder(
                                     null, context.getString(R.string.cancel), cancel(context, task))
                             .build());
         }

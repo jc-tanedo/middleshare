@@ -12,13 +12,10 @@ public class VideoDownloadActivity extends ShareActivity {
     static final String TRANSFER = "dev.middleshare.TRANSFER";
     static final String OPEN = "dev.middleshare.TRANSFER_OPEN";
     static final String SEND_READY = "dev.middleshare.TRANSFER_SEND";
-    static final String PICK = "dev.middleshare.TRANSFER_PICK";
     private VideoTransfers.Task task;
-    private boolean picked;
 
     @Override
     public void onCreate(Bundle state) {
-        picked = state != null && state.getBoolean("picker_opened");
         if (state != null && state.getString(TRANSFER) != null)
             getIntent().putExtra(TRANSFER, state.getString(TRANSFER));
         super.onCreate(state);
@@ -26,7 +23,6 @@ public class VideoDownloadActivity extends ShareActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
-        state.putBoolean("picker_opened", picked);
         if (task() != null) state.putString(TRANSFER, task.id);
         super.onSaveInstanceState(state);
     }
@@ -44,19 +40,6 @@ public class VideoDownloadActivity extends ShareActivity {
     @Override
     protected boolean backgroundVideo() {
         return true;
-    }
-
-    @Override
-    protected boolean needsReadyDestination() {
-        return true;
-    }
-
-    @Override
-    protected boolean canDispatchVideo() {
-        return !VideoNotifications.allowed(this)
-                || OPEN.equals(getIntent().getAction())
-                || SEND_READY.equals(getIntent().getAction())
-                || (PICK.equals(getIntent().getAction()) && picked);
     }
 
     @Override
@@ -111,20 +94,6 @@ public class VideoDownloadActivity extends ShareActivity {
             requestPermissions(new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 43);
             return;
         }
-        if (PICK.equals(getIntent().getAction()) && !picked) {
-            // Defer completion until the destination picker has returned.
-            picked = true;
-            openDestinationPicker();
-        } else if (Intent.ACTION_SEND.equals(getIntent().getAction())
-                && currentJob().error == null) {
-            if (VideoNotifications.allowed(this)) finish();
-            else
-                android.widget.Toast.makeText(
-                                this,
-                                R.string.transfer_notifications_disabled,
-                                android.widget.Toast.LENGTH_LONG)
-                        .show();
-        }
     }
 
     @Override
@@ -133,31 +102,21 @@ public class VideoDownloadActivity extends ShareActivity {
         if (code == 43 && VideoNotifications.allowed(this)) {
             if (task() != null && task.job.completed && !task.removed)
                 VideoNotifications.publish(this, task);
-            if (Intent.ACTION_SEND.equals(getIntent().getAction())
-                    && currentJob() != null
-                    && currentJob().error == null) finish();
         }
     }
 
     @Override
-    protected void destinationChanged(ComponentName target) {
-        if (task() != null) task.destination(target);
-        if (currentJob() != null && currentJob().completed && target == null) finish();
-        else if (currentJob() != null
-                && !currentJob().completed
-                && VideoNotifications.allowed(this))
-            new android.os.Handler(getMainLooper())
-                    .post(
-                            () -> {
-                                if (!isFinishing()
-                                        && currentJob() != null
-                                        && !currentJob().dispatched) finish();
-                            });
+    protected Intent shareChooser(ConversionJob result) {
+        return ShareIntents.chooser(
+                this,
+                result.outputs,
+                VideoShareReceiver.callback(this, getIntent().getStringExtra(TRANSFER)));
     }
 
     @Override
     protected void shareDispatched() {
-        VideoTransfers.remove(task(), true);
+        // Direct favorite handoff is observable; the native chooser's final Send is not.
+        if (currentJob() != null && currentJob().dispatched) VideoTransfers.remove(task(), true);
     }
 
     @Override

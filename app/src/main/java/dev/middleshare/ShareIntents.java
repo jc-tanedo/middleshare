@@ -70,12 +70,17 @@ final class ShareIntents {
     }
 
     static Intent chooser(Context context, List<SharedFile> outputs) {
+        return chooser(context, outputs, null);
+    }
+
+    static Intent chooser(
+            Context context, List<SharedFile> outputs, android.content.IntentSender onChosen) {
         Intent outgoing = outgoing(outputs);
         String label =
                 outgoing.getType().startsWith("video/")
                         ? "Share video"
                         : "Share image" + (outputs.size() > 1 ? "s" : "");
-        Intent chooser = Intent.createChooser(outgoing, label);
+        Intent chooser = Intent.createChooser(outgoing, label, onChosen);
         chooser.putExtra(
                 Intent.EXTRA_EXCLUDE_COMPONENTS,
                 new Parcelable[] {new ComponentName(context, ShareActivity.class)});
