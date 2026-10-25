@@ -44,10 +44,6 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        if (getWindow() != null) {
-            getWindow().setGravity(android.view.Gravity.BOTTOM);
-            getWindow().setLayout(-1, -2);
-        }
         link = getIntent().getStringExtra(Intent.EXTRA_TEXT);
         if (link == null || !link.startsWith("https://") && !link.startsWith("http://")) {
             finish();
@@ -134,6 +130,12 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
                             }
                         });
         selectQuality();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Ui.layoutSheet(this);
     }
 
     private void selectQuality() {

@@ -15,6 +15,7 @@ import java.io.IOException;
 public class ShareActivity extends Activity implements ConversionJob.Listener {
     private ConversionJob job;
     private TextView progress;
+    private TextView status;
     private LinearLayout page;
     private boolean showingError;
     private String pendingLink;
@@ -30,10 +31,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        if (getWindow() != null) {
-            getWindow().setGravity(android.view.Gravity.BOTTOM);
-            getWindow().setLayout(-1, -2);
-        }
         if (state != null) {
             String saved = state.getString("favorite");
             destination = saved == null ? null : ComponentName.unflattenFromString(saved);
@@ -49,6 +46,14 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         progress.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
         page.addView(progress);
         Ui.gap(this, page, 20);
+        status = Ui.text(this, "", 16, Ui.MUTED, false);
+        status.setId(R.id.share_status);
+        status.setMinLines(2);
+        status.setMaxLines(2);
+        status.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        page.addView(status);
+        Ui.gap(this, page, 16);
         ProgressBar spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         spinner.setIndeterminate(true);
         spinner.setContentDescription(getString(R.string.preparing_share_file));
@@ -56,12 +61,9 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         spinnerParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
         page.addView(spinner, spinnerParams);
         Ui.gap(this, page, 20);
-        page.addView(Ui.text(this, getString(R.string.processing_details), 16, Ui.MUTED, false));
-        Button cancel = Ui.button(this, R.string.cancel, false);
-        cancel.setText(R.string.cancel);
-        cancel.setAllCaps(false);
-        cancel.setOnClickListener(v -> cancelShare());
-        page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
+        TextView details =
+                Ui.text(this, getString(R.string.processing_details), 14, Ui.MUTED, false);
+        page.addView(details);
         if (state != null && state.getBoolean("dispatched")) {
             finish();
             return;
@@ -111,12 +113,32 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                                 + " again.");
             }
         }
+        if (showingError) return;
+        if (job != null && job.video) details.setText(R.string.video_processing_details);
+        else status.setVisibility(android.view.View.GONE);
+        Ui.gap(this, page, 20);
+        Button cancel = Ui.button(this, R.string.cancel, false);
+        cancel.setId(R.id.share_cancel);
+        cancel.setOnClickListener(v -> cancelShare());
         if (job != null && job.video && backgroundVideo()) {
-            Button hide = Ui.button(this, R.string.minimize_download, false);
+            LinearLayout actions = new LinearLayout(this);
+            actions.setId(R.id.download_actions);
+            actions.setOrientation(LinearLayout.HORIZONTAL);
+            Button hide = Ui.button(this, R.string.minimize_download, true);
             hide.setId(R.id.video_background);
             hide.setOnClickListener(v -> finish());
-            page.addView(hide, new LinearLayout.LayoutParams(-1, -2));
-        }
+            actions.addView(hide, new LinearLayout.LayoutParams(0, -2, 1));
+            LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(0, -2, 1);
+            cancelParams.setMarginStart(Ui.dp(this, 12));
+            actions.addView(cancel, cancelParams);
+            page.addView(actions, new LinearLayout.LayoutParams(-1, -2));
+        } else page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Ui.layoutSheet(this);
     }
 
     protected ConversionJob currentJob() {
@@ -244,7 +266,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
 
     @Override
     public void onStatus(String message) {
-        progress.setText(message);
+        status.setText(message);
     }
 
     @Override

@@ -33,6 +33,16 @@ final class Ui {
         return Math.round(value * a.getResources().getDisplayMetrics().density);
     }
 
+    static void layoutSheet(Activity activity) {
+        android.view.Window window = activity.getWindow();
+        window.setGravity(android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL);
+        int width =
+                Math.min(
+                        activity.getResources().getDisplayMetrics().widthPixels, dp(activity, 600));
+        window.setLayout(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setWindowAnimations(0);
+    }
+
     static LinearLayout screen(Activity a) {
         ScrollView scroll = new ScrollView(a);
         scroll.setFillViewport(true);

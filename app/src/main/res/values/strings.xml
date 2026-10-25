@@ -43,4 +43,5 @@
     <string name="transfer_notification_settings">Download notification settings</string>
     <string name="view_downloads">View downloads</string>
     <string name="video_tools">Video add-on &amp; downloads</string>
+    <string name="video_processing_details">You can minimize this drawer while the video downloads.</string>
 </resources>

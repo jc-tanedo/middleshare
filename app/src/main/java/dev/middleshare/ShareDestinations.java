@@ -52,7 +52,11 @@ final class ShareDestinations {
 
     static Intent outgoing(Context context, List<SharedFile> files, ComponentName target) {
         Intent payload = ShareIntents.outgoing(files);
-        if (!available(context, target, payload)) return null;
+        if (!available(context, target, payload)) {
+            // Some media receivers require a content scheme as well as a MIME type.
+            payload.setDataAndType(files.get(0).uri, payload.getType());
+            if (!available(context, target, payload)) return null;
+        }
         return payload.setComponent(target);
     }
 }

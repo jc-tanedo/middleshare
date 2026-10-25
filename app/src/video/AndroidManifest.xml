@@ -4,6 +4,7 @@
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="video/*" />
         </intent>
+        <intent><action android:name="android.intent.action.SEND" /><data android:scheme="content" android:mimeType="video/*" /></intent>
     </queries>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

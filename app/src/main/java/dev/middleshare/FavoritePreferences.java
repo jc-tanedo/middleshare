@@ -6,7 +6,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -52,38 +54,115 @@ final class FavoritePreferences {
                 });
     }
 
-    static void showPicker(Activity activity, Runnable changed) {
-        var pm = activity.getPackageManager();
+    static ArrayList<ResolveInfo> receivers(android.content.Context context) {
+        var pm = context.getPackageManager();
         var candidates = new LinkedHashMap<ComponentName, ResolveInfo>();
-        for (String mime : new String[] {"image/*", "video/*"}) {
-            for (ResolveInfo info :
-                    pm.queryIntentActivities(
-                            new Intent(Intent.ACTION_SEND).setType(mime),
-                            PackageManager.MATCH_DEFAULT_ONLY)) {
-                if (!ShareDestinations.receiverAllowed(activity, info.activityInfo)) continue;
-                var target =
-                        new ComponentName(info.activityInfo.packageName, info.activityInfo.name);
-                candidates.put(target, info);
+        for (String mime :
+                new String[] {
+                    "image/*",
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                    "video/*",
+                    "video/mp4",
+                    "video/webm"
+                }) {
+            for (String action : new String[] {Intent.ACTION_SEND, Intent.ACTION_SEND_MULTIPLE}) {
+                if (mime.startsWith("video/") && Intent.ACTION_SEND_MULTIPLE.equals(action))
+                    continue;
+                for (boolean content : new boolean[] {false, true}) {
+                    Intent query = new Intent(action);
+                    if (content)
+                        query.setDataAndType(
+                                Uri.parse(
+                                        "content://"
+                                                + context.getPackageName()
+                                                + ".files/favorite-preview"),
+                                mime);
+                    else query.setType(mime);
+                    for (ResolveInfo info :
+                            pm.queryIntentActivities(query, PackageManager.MATCH_DEFAULT_ONLY)) {
+                        if (!ShareDestinations.receiverAllowed(context, info.activityInfo))
+                            continue;
+                        var target =
+                                new ComponentName(
+                                        info.activityInfo.packageName, info.activityInfo.name);
+                        candidates.put(target, info);
+                    }
+                }
             }
         }
         var apps = new ArrayList<>(candidates.values());
         apps.sort(
-                (a, b) ->
-                        a.loadLabel(pm).toString().compareToIgnoreCase(b.loadLabel(pm).toString()));
+                java.util.Comparator.comparing(
+                                (ResolveInfo app) ->
+                                        app.activityInfo.applicationInfo.loadLabel(pm).toString(),
+                                String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(
+                                app -> app.loadLabel(pm).toString(),
+                                String.CASE_INSENSITIVE_ORDER));
+        return apps;
+    }
+
+    static void showPicker(Activity activity, Runnable changed) {
+        var apps = receivers(activity);
+        LinearLayout content = new LinearLayout(activity);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(
+                Ui.dp(activity, 20), Ui.dp(activity, 20), Ui.dp(activity, 20), Ui.dp(activity, 8));
+        content.addView(
+                Ui.text(activity, activity.getString(R.string.favorite_choose), 24, Ui.INK, true));
+        Ui.gap(activity, content, 16);
+        GridView grid = new GridView(activity);
+        grid.setId(R.id.favorite_grid);
+        grid.setNumColumns(GridView.AUTO_FIT);
+        grid.setColumnWidth(
+                Ui.dp(
+                        activity,
+                        activity.getResources().getConfiguration().fontScale > 1.2f ? 128 : 96));
+        grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        grid.setHorizontalSpacing(Ui.dp(activity, 8));
+        grid.setVerticalSpacing(Ui.dp(activity, 8));
+        grid.setClipToPadding(false);
+        grid.setAdapter(new FavoriteAppsAdapter(activity, apps));
+        int height =
+                Math.min(
+                        Ui.dp(activity, 480),
+                        Math.max(
+                                Ui.dp(activity, 96),
+                                activity.getResources().getDisplayMetrics().heightPixels
+                                        - Ui.dp(activity, 200)));
+        if (apps.isEmpty())
+            content.addView(
+                    Ui.text(
+                            activity,
+                            activity.getString(R.string.favorite_no_apps),
+                            16,
+                            Ui.MUTED,
+                            false));
+        else content.addView(grid, new LinearLayout.LayoutParams(-1, height));
         AlertDialog.Builder dialog =
                 new AlertDialog.Builder(activity)
-                        .setTitle(R.string.favorite_choose)
+                        .setView(content)
                         .setNegativeButton(R.string.cancel, null);
-        if (apps.isEmpty()) dialog.setMessage(R.string.favorite_no_apps);
-        else
-            dialog.setItems(
-                    apps.stream().map(app -> app.loadLabel(pm).toString()).toArray(String[]::new),
-                    (d, which) -> {
-                        var app = apps.get(which).activityInfo;
-                        Settings.setFavorite(
-                                activity, new ComponentName(app.packageName, app.name));
-                        changed.run();
-                    });
-        Ui.styleDialog(activity, dialog.show());
+        AlertDialog shown = dialog.create();
+        grid.setOnItemClickListener(
+                (parent, view, which, id) -> {
+                    var app = apps.get(which).activityInfo;
+                    if (!ShareDestinations.receiverAllowed(activity, app)) return;
+                    Settings.setFavorite(activity, new ComponentName(app.packageName, app.name));
+                    changed.run();
+                    shown.dismiss();
+                });
+        shown.show();
+        shown.getWindow().setBackgroundDrawable(Ui.shape(activity, R.color.surface, 28));
+        shown.getWindow()
+                .setLayout(
+                        Math.min(
+                                activity.getResources().getDisplayMetrics().widthPixels
+                                        - Ui.dp(activity, 32),
+                                Ui.dp(activity, 720)),
+                        -2);
+        Ui.styleDialog(activity, shown);
     }
 }

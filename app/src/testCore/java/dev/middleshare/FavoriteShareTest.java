@@ -54,7 +54,16 @@ public class FavoriteShareTest {
         var controller = Robolectric.buildActivity(MainActivity.class).setup();
         try {
             controller.get().findViewById(R.id.favorite_choose).performClick();
-            ShadowAlertDialog.getLatestAlertDialog().getListView().performItemClick(null, 0, 0);
+            android.widget.GridView grid =
+                    ShadowAlertDialog.getLatestAlertDialog().findViewById(R.id.favorite_grid);
+            assertNotNull(grid);
+            assertNotNull(
+                    ((android.widget.ImageView)
+                                    ((android.view.ViewGroup)
+                                                    grid.getAdapter().getView(0, null, grid))
+                                            .getChildAt(0))
+                            .getDrawable());
+            grid.performItemClick(null, 0, 0);
             shadowOf(Looper.getMainLooper()).idle();
             assertEquals(target, Settings.getFavorite(context));
             controller.recreate();
@@ -64,6 +73,90 @@ public class FavoriteShareTest {
         } finally {
             controller.pause().stop().destroy();
         }
+    }
+
+    private void receiver(
+            ComponentName component, String action, String mime, boolean content, String appLabel)
+            throws Exception {
+        var packages = shadowOf(context.getPackageManager());
+        ActivityInfo info = packages.addActivityIfNotPresent(component);
+        info.exported = true;
+        info.enabled = true;
+        info.nonLocalizedLabel = "Chat";
+        info.applicationInfo.enabled = true;
+        info.applicationInfo.nonLocalizedLabel = appLabel;
+        var filter = new android.content.IntentFilter(action);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        filter.addDataType(mime);
+        if (content) filter.addDataScheme("content");
+        packages.addIntentFilterForActivity(component, filter);
+    }
+
+    @Test
+    public void pickerIncludesContentAndBatchReceiversAndDistinguishesGenericLabels()
+            throws Exception {
+        ComponentName content = new ComponentName("example.content", "example.content.Chat");
+        ComponentName batch = new ComponentName("example.batch", "example.batch.Chat");
+        receiver(content, Intent.ACTION_SEND, "image/jpeg", true, "Content App");
+        receiver(batch, Intent.ACTION_SEND_MULTIPLE, "image/png", false, "Batch App");
+        var apps = FavoritePreferences.receivers(context);
+        assertEquals(3, apps.size());
+        assertEquals(
+                1,
+                apps.stream()
+                        .filter(info -> info.activityInfo.packageName.equals("example.content"))
+                        .count());
+        assertEquals(
+                1,
+                apps.stream()
+                        .filter(info -> info.activityInfo.packageName.equals("example.batch"))
+                        .count());
+        var controller = Robolectric.buildActivity(MainActivity.class).setup();
+        try {
+            controller.get().findViewById(R.id.favorite_choose).performClick();
+            android.widget.GridView grid =
+                    ShadowAlertDialog.getLatestAlertDialog().findViewById(R.id.favorite_grid);
+            for (int i = 0; i < grid.getCount(); i++) {
+                android.content.pm.ResolveInfo info =
+                        (android.content.pm.ResolveInfo) grid.getAdapter().getItem(i);
+                if (!info.activityInfo.packageName.equals("example.content")) continue;
+                var cell = grid.getAdapter().getView(i, null, grid);
+                assertEquals("Content App, Chat", cell.getContentDescription());
+                grid.performItemClick(cell, i, i);
+                assertEquals(content, Settings.getFavorite(context));
+                break;
+            }
+            assertEquals(content, Settings.getFavorite(context));
+        } finally {
+            controller.pause().stop().destroy();
+        }
+    }
+
+    @Test
+    public void contentReceiverGetsReadableContentIntentAndBatchOnlyReceiverRejectsSingleFile()
+            throws Exception {
+        ComponentName content = new ComponentName("example.content", "example.content.Chat");
+        ComponentName batch = new ComponentName("example.batch", "example.batch.Chat");
+        receiver(content, Intent.ACTION_SEND, "image/png", true, "Content App");
+        receiver(batch, Intent.ACTION_SEND_MULTIPLE, "image/png", false, "Batch App");
+        SharedFile file =
+                new SharedFile(
+                        context,
+                        new File(ShareProvider.directory(context), UUID.randomUUID() + ".png"),
+                        "image/png");
+        Intent outgoing =
+                ShareDestinations.outgoing(
+                        context, java.util.Collections.singletonList(file), content);
+        assertNotNull(outgoing);
+        assertEquals(content, outgoing.getComponent());
+        assertEquals(file.uri, outgoing.getData());
+        assertEquals(file.uri, outgoing.getParcelableExtra(Intent.EXTRA_STREAM));
+        assertTrue((outgoing.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
+        assertNull(
+                ShareDestinations.outgoing(
+                        context, java.util.Collections.singletonList(file), batch));
+        assertNotNull(
+                ShareDestinations.outgoing(context, java.util.Arrays.asList(file, file), batch));
     }
 
     @Test

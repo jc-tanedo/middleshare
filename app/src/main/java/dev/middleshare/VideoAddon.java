@@ -14,7 +14,7 @@ import android.widget.Toast;
 final class VideoAddon {
     static final String PACKAGE = "dev.middleshare.video";
     static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final int MIN_VERSION = 12;
+    static final int MIN_VERSION = 13;
     static final String DESTINATION = "dev.middleshare.DESTINATION";
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String FORMAT = "dev.middleshare.FORMAT";
