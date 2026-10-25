@@ -311,6 +311,92 @@ public class BackgroundVideoTest {
     }
 
     @Test
+    public void readyVideoSelectionReturnsFromPrivatePickerAndHandsOffAfterResume()
+            throws Exception {
+        VideoTransfers.Task task = task(null);
+        try {
+            complete(task);
+            // Also exercise the saved-ready path used when Android has reclaimed the process.
+            var field = VideoTransfers.class.getDeclaredField("tasks");
+            field.setAccessible(true);
+            ((java.util.Map<?, ?>) field.get(null)).clear();
+            VideoTransfers.Task restored = VideoTransfers.find(context, task.id);
+            VideoNotifications.publish(context, restored);
+            var controller =
+                    Robolectric.buildActivity(
+                                    VideoDownloadActivity.class,
+                                    new Intent(context, VideoDownloadActivity.class)
+                                            .setAction(VideoDownloadActivity.SEND_READY)
+                                            .putExtra(VideoDownloadActivity.TRANSFER, task.id))
+                            .setup();
+            try {
+                Intent pickerIntent = shadowOf(controller.get()).getNextStartedActivity();
+                assertEquals(
+                        DestinationPickerActivity.class.getName(),
+                        pickerIntent.getComponent().getClassName());
+                Intent prototype = pickerIntent.getParcelableExtra(Intent.EXTRA_INTENT);
+                assertEquals("video/mp4", prototype.getType());
+                assertNull(prototype.getClipData());
+                controller.pause();
+                var picker =
+                        Robolectric.buildActivity(DestinationPickerActivity.class, pickerIntent)
+                                .setup();
+                try {
+                    android.widget.Button receiver =
+                            findButton(picker.get().getWindow().getDecorView(), "Receiver");
+                    assertNotNull(receiver);
+                    receiver.performClick();
+                    assertTrue(picker.get().isFinishing());
+                    assertEquals(
+                            android.app.Activity.RESULT_OK, shadowOf(picker.get()).getResultCode());
+                    controller
+                            .get()
+                            .onActivityResult(
+                                    ShareActivity.PICK_DESTINATION,
+                                    shadowOf(picker.get()).getResultCode(),
+                                    shadowOf(picker.get()).getResultIntent());
+                    assertFalse(controller.get().isFinishing());
+                    assertFalse(restored.job.dispatched);
+                    controller.resume();
+                    Intent outgoing = shadowOf(controller.get()).getNextStartedActivity();
+                    assertNotNull(outgoing);
+                    assertEquals(TARGET, outgoing.getComponent());
+                    assertEquals("video/mp4", outgoing.getType());
+                    assertNotNull(outgoing.getParcelableExtra(Intent.EXTRA_STREAM));
+                    assertNotNull(outgoing.getClipData());
+                    assertTrue((outgoing.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
+                    assertNull(VideoTransfers.find(context, task.id));
+                    assertNull(
+                            shadowOf(context.getSystemService(NotificationManager.class))
+                                    .getNotification(task.notificationId));
+                    assertTrue(restored.job.outputs.get(0).file.isFile());
+                } finally {
+                    picker.pause().stop().destroy();
+                }
+            } finally {
+                controller.pause().stop().destroy();
+                VideoTransfers.remove(restored, false);
+            }
+        } finally {
+            VideoTransfers.remove(task, false);
+        }
+    }
+
+    private static android.widget.Button findButton(android.view.View view, String label) {
+        if (view instanceof android.widget.Button
+                && label.contentEquals(((android.widget.Button) view).getText()))
+            return (android.widget.Button) view;
+        if (view instanceof android.view.ViewGroup) {
+            var group = (android.view.ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                var found = findButton(group.getChildAt(i), label);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    @Test
     public void deniedNotificationsStillAllowForegroundHandoff() throws Exception {
         VideoTransfers.Task task = task(TARGET);
         try {

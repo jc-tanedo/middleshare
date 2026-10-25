@@ -387,7 +387,13 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
             selectingDestination = false;
             ComponentName selected =
                     resultCode == RESULT_OK && data != null ? data.getComponent() : null;
-            if (selected != null && ShareDestinations.available(this, selected))
+            Intent expected =
+                    new Intent(Intent.ACTION_SEND)
+                            .setType(
+                                    job != null && job.completed && !job.outputs.isEmpty()
+                                            ? job.outputs.get(0).mime
+                                            : "video/*");
+            if (selected != null && ShareDestinations.available(this, selected, expected))
                 destination = selected;
             destinationChanged(destination);
             updateDestination();

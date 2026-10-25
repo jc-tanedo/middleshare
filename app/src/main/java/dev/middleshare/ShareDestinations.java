@@ -20,6 +20,7 @@ final class ShareDestinations {
 
     static Intent picker(Context context, String mime) {
         return new Intent(Intent.ACTION_PICK_ACTIVITY)
+                .setClass(context, DestinationPickerActivity.class)
                 .putExtra(Intent.EXTRA_INTENT, new Intent(Intent.ACTION_SEND).setType(mime))
                 .putExtra(Intent.EXTRA_TITLE, context.getString(R.string.choose_destination));
     }
