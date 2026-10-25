@@ -12,6 +12,7 @@ import java.util.Locale;
 
 final class Settings {
     static final int JPEG_QUALITY = 92;
+    private static final String HOST_QUALITY_PREFIX = "video_quality_host_";
 
     enum Format {
         JPEG("image/jpeg", ".jpg"),
@@ -52,26 +53,26 @@ final class Settings {
         if (host == null) return getVideoQuality(context);
         return VideoQuality.parse(
                 prefs(context)
-                        .getString("video_quality_host_" + host, getVideoQuality(context).name()));
+                        .getString(HOST_QUALITY_PREFIX + host, getVideoQuality(context).name()));
     }
 
     static void setVideoQuality(Context context, String host, VideoQuality quality) {
         if (host == null) return;
-        prefs(context).edit().putString("video_quality_host_" + host, quality.name()).apply();
+        prefs(context).edit().putString(HOST_QUALITY_PREFIX + host, quality.name()).apply();
     }
 
     static List<String> videoQualityHosts(Context context) {
         List<String> hosts = new ArrayList<>();
         for (String key : prefs(context).getAll().keySet()) {
-            if (key.startsWith("video_quality_host_"))
-                hosts.add(key.substring("video_quality_host_".length()));
+            if (key.startsWith(HOST_QUALITY_PREFIX))
+                hosts.add(key.substring(HOST_QUALITY_PREFIX.length()));
         }
         Collections.sort(hosts);
         return hosts;
     }
 
     static void clearVideoQuality(Context context, String host) {
-        if (host != null) prefs(context).edit().remove("video_quality_host_" + host).apply();
+        if (host != null) prefs(context).edit().remove(HOST_QUALITY_PREFIX + host).apply();
     }
 
     static void setVideoQuality(Context context, VideoQuality quality) {

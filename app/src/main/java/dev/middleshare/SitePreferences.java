@@ -2,7 +2,6 @@ package dev.middleshare;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -22,16 +21,6 @@ final class SitePreferences {
 
     static void show(Activity activity) {
         new SitePreferences(activity).showSites();
-    }
-
-    private Spinner picker(String[] labels, String description) {
-        Spinner picker = new Spinner(activity);
-        picker.setContentDescription(description);
-        picker.setAdapter(
-                new ArrayAdapter<>(
-                        activity, android.R.layout.simple_spinner_dropdown_item, labels));
-        Ui.field(activity, picker);
-        return picker;
     }
 
     private void showSites() {
@@ -78,7 +67,8 @@ final class SitePreferences {
         form.addView(domain);
         Ui.gap(activity, form, 12);
         Spinner quality =
-                picker(
+                Ui.picker(
+                        activity,
                         java.util.Arrays.stream(SITE_QUALITIES)
                                 .map(q -> q.label)
                                 .toArray(String[]::new),

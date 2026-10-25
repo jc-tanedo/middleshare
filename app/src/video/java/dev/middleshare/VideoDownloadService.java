@@ -23,7 +23,7 @@ public final class VideoDownloadService extends Service implements VideoTransfer
         super.onCreate();
         VideoNotifications.createChannel(this);
         for (VideoTransfers.Task recovered : VideoTransfers.recover(this))
-            if (recovered.job.completed) notifySafely(recovered);
+            if (recovered.job.completed) VideoNotifications.publish(this, recovered);
         VideoTransfers.observe(this);
     }
 
@@ -83,16 +83,12 @@ public final class VideoDownloadService extends Service implements VideoTransfer
             if (foreground) stopForeground(STOP_FOREGROUND_REMOVE);
             foreground = false;
             releaseWakeLock();
-            notifySafely(task);
+            VideoNotifications.publish(this, task);
             stopSelf(lastStartId);
         } else if (android.os.SystemClock.elapsedRealtime() - task.lastNotification >= 1000) {
             task.lastNotification = android.os.SystemClock.elapsedRealtime();
-            notifySafely(task);
+            VideoNotifications.publish(this, task);
         }
-    }
-
-    private void notifySafely(VideoTransfers.Task task) {
-        VideoNotifications.publish(this, task);
     }
 
     private void releaseWakeLock() {
@@ -112,7 +108,7 @@ public final class VideoDownloadService extends Service implements VideoTransfer
         VideoTransfers.forget(this);
         if (active != null && !active.removed && !active.job.completed) {
             active.job.interrupt(getString(R.string.transfer_interrupted));
-            notifySafely(active);
+            VideoNotifications.publish(this, active);
         }
         releaseWakeLock();
         super.onDestroy();

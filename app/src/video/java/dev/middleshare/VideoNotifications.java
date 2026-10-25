@@ -103,13 +103,13 @@ final class VideoNotifications {
                         .setContentTitle(
                                 context.getString(
                                         done
-                                                ? (task.job.error == null
+                                                ? (task.ready()
                                                         ? R.string.transfer_ready
                                                         : R.string.transfer_failed)
                                                 : R.string.preparing_video))
                         .setContentText(
                                 done
-                                        ? (task.job.error == null
+                                        ? (task.ready()
                                                 ? context.getString(R.string.transfer_tap_send)
                                                 : task.job.error)
                                         : task.status)
@@ -123,7 +123,7 @@ final class VideoNotifications {
         if (task.destination != null)
             builder.setSubText(ShareDestinations.label(context, task.destination));
         if (done) {
-            if (task.job.error == null)
+            if (task.ready())
                 builder.addAction(
                         new Notification.Action.Builder(
                                         null,

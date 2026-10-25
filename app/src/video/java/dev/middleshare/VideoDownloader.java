@@ -96,24 +96,29 @@ final class VideoDownloader {
         cancelled.set(true);
     }
 
+    private static YoutubeDLRequest baseRequest(String url) {
+        YoutubeDLRequest request = new YoutubeDLRequest(url);
+        request.addOption("--ignore-config");
+        request.addOption("--no-playlist");
+        request.addOption("--playlist-items", "1");
+        request.addOption("--no-cache-dir");
+        request.addOption("--socket-timeout", 20);
+        request.addOption("--extractor-retries", 1);
+        return request;
+    }
+
     static YoutubeDLRequest request(String url, File work) {
         return request(url, work, VideoQuality.BEST, null, false);
     }
 
     static YoutubeDLRequest request(
             String url, File work, VideoQuality quality, String customId, boolean needsAudio) {
-        YoutubeDLRequest request = new YoutubeDLRequest(url);
-        request.addOption("--ignore-config");
-        request.addOption("--no-playlist");
-        request.addOption("--playlist-items", "1");
-        request.addOption("--no-cache-dir");
+        YoutubeDLRequest request = baseRequest(url);
         request.addOption("--no-mtime");
         request.addOption("--no-write-thumbnail");
         request.addOption("--no-write-info-json");
-        request.addOption("--socket-timeout", 20);
         request.addOption("--retries", 2);
         request.addOption("--fragment-retries", 2);
-        request.addOption("--extractor-retries", 1);
         request.addOption("--concurrent-fragments", 2);
         request.addOption("--max-filesize", MAX_VIDEO_BYTES);
         request.addOption("--match-filter", "!is_live & !is_upcoming");
@@ -190,22 +195,16 @@ final class VideoDownloader {
         } finally {
             if (cancelled.get() || stopped.get() != null) stop(id);
             monitor.shutdownNow();
-            remove(work);
+            CacheFiles.deleteTree(work);
         }
     }
 
     static YoutubeDLRequest formatsRequest(String url) {
-        YoutubeDLRequest request = new YoutubeDLRequest(url);
-        request.addOption("--ignore-config");
-        request.addOption("--no-playlist");
-        request.addOption("--playlist-items", "1");
-        request.addOption("--no-cache-dir");
+        YoutubeDLRequest request = baseRequest(url);
         request.addOption("--skip-download");
         request.addOption("--dump-single-json");
         request.addOption("--no-warnings");
-        request.addOption("--socket-timeout", 20);
         request.addOption("--retries", 1);
-        request.addOption("--extractor-retries", 1);
         return request;
     }
 
@@ -311,11 +310,5 @@ final class VideoDownloader {
         File[] files = file.listFiles();
         if (files != null) for (File child : files) total += size(child);
         return total;
-    }
-
-    static void remove(File file) {
-        File[] files = file.listFiles();
-        if (files != null) for (File child : files) remove(child);
-        file.delete();
     }
 }

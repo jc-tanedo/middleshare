@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /** Validates explicit favorite receivers against the finished payload. */
@@ -72,6 +75,56 @@ final class ShareDestinations {
         } catch (IllegalArgumentException missing) {
             return false;
         }
+    }
+
+    static ArrayList<ResolveInfo> receivers(android.content.Context context) {
+        var pm = context.getPackageManager();
+        var candidates = new LinkedHashMap<ComponentName, ResolveInfo>();
+        for (String mime :
+                new String[] {
+                    "image/*",
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                    "video/*",
+                    "video/mp4",
+                    "video/webm"
+                }) {
+            for (String action : new String[] {Intent.ACTION_SEND, Intent.ACTION_SEND_MULTIPLE}) {
+                if (mime.startsWith("video/") && Intent.ACTION_SEND_MULTIPLE.equals(action))
+                    continue;
+                for (boolean content : new boolean[] {false, true}) {
+                    Intent query = new Intent(action);
+                    if (content)
+                        query.setDataAndType(
+                                Uri.parse(
+                                        "content://"
+                                                + context.getPackageName()
+                                                + ".files/favorite-preview"),
+                                mime);
+                    else query.setType(mime);
+                    for (ResolveInfo info :
+                            pm.queryIntentActivities(query, PackageManager.MATCH_DEFAULT_ONLY)) {
+                        if (!ShareDestinations.receiverAllowed(context, info.activityInfo))
+                            continue;
+                        var target =
+                                new ComponentName(
+                                        info.activityInfo.packageName, info.activityInfo.name);
+                        candidates.put(target, info);
+                    }
+                }
+            }
+        }
+        var apps = new ArrayList<>(candidates.values());
+        apps.sort(
+                java.util.Comparator.comparing(
+                                (ResolveInfo app) ->
+                                        app.activityInfo.applicationInfo.loadLabel(pm).toString(),
+                                String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(
+                                app -> app.loadLabel(pm).toString(),
+                                String.CASE_INSENSITIVE_ORDER));
+        return apps;
     }
 
     static String label(Context context, ComponentName target) {

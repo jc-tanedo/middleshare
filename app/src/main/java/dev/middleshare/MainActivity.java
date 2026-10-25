@@ -1,11 +1,9 @@
 package dev.middleshare;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -13,16 +11,27 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public final class MainActivity extends Activity {
-    @Override
-    protected void attachBaseContext(android.content.Context base) {
-        super.attachBaseContext(Ui.themedContext(base));
-    }
+public final class MainActivity extends ThemedActivity {
+    private static final int REQUEST_IMAGE = 10;
 
     @Override
     public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
         LinearLayout page = Ui.screen(this);
+        addBrand(page);
+        if (BuildConfig.VIDEO_TOOLS) {
+            showVideoAddon(page);
+            return;
+        }
+        FavoritePreferences.addCard(this, page);
+        addImageSettings(page);
+        addVideoSettings(page);
+        addAppearanceSettings(page);
+        addHelp(page);
+        addAbout(page);
+    }
+
+    private void addBrand(LinearLayout page) {
         LinearLayout brand = new LinearLayout(this);
         brand.setGravity(android.view.Gravity.CENTER_VERTICAL);
         android.widget.ImageView mark = new android.widget.ImageView(this);
@@ -43,12 +52,9 @@ public final class MainActivity extends Activity {
         Ui.gap(this, page, 12);
         page.addView(Ui.text(this, "A smoother way to share.", 16, Ui.MUTED, false));
         Ui.gap(this, page, 28);
-        if (BuildConfig.VIDEO_TOOLS) {
-            showVideoAddon(page);
-            return;
-        }
+    }
 
-        FavoritePreferences.addCard(this, page);
+    private void addImageSettings(LinearLayout page) {
         LinearLayout images = Ui.card(this, page);
         Ui.heading(this, images, "Images", "Turn WebP into a format your destination app accepts.");
         TextView rule = Ui.text(this, "", 14, Ui.ACCENT, true);
@@ -78,7 +84,7 @@ public final class MainActivity extends Activity {
                                     .setType("image/*")
                                     .addCategory(Intent.CATEGORY_OPENABLE);
                     try {
-                        startActivityForResult(intent, 10);
+                        startActivityForResult(intent, REQUEST_IMAGE);
                     } catch (android.content.ActivityNotFoundException e) {
                         new AlertDialog.Builder(this)
                                 .setMessage("No image picker is available on this device.")
@@ -87,7 +93,9 @@ public final class MainActivity extends Activity {
                     }
                 });
         images.addView(pick, new LinearLayout.LayoutParams(-1, -2));
+    }
 
+    private void addVideoSettings(LinearLayout page) {
         LinearLayout videos = Ui.card(this, page);
         Ui.heading(
                 this,
@@ -106,7 +114,8 @@ public final class MainActivity extends Activity {
         Ui.gap(this, videos, 16);
         videos.addView(Ui.text(this, "Default quality", 14, Ui.MUTED, true));
         Spinner quality =
-                picker(
+                Ui.picker(
+                        this,
                         java.util.Arrays.stream(VideoQuality.values())
                                 .map(q -> q.label)
                                 .toArray(String[]::new),
@@ -157,11 +166,16 @@ public final class MainActivity extends Activity {
             releases.setOnClickListener(v -> VideoAddon.downloads(this));
             videos.addView(releases, new LinearLayout.LayoutParams(-1, -2));
         }
+    }
 
+    private void addAppearanceSettings(LinearLayout page) {
         LinearLayout appearance = Ui.card(this, page);
         Ui.heading(this, appearance, "Appearance", "Follow your device, or make it your own.");
         Spinner theme =
-                picker(new String[] {"Use device theme", "Light", "Dark · Nord"}, "Color theme");
+                Ui.picker(
+                        this,
+                        new String[] {"Use device theme", "Light", "Dark · Nord"},
+                        "Color theme");
         theme.setSelection(Settings.getTheme(this).ordinal());
         appearance.addView(theme);
         theme.setOnItemSelectedListener(
@@ -180,6 +194,9 @@ public final class MainActivity extends Activity {
 
                     public void onNothingSelected(android.widget.AdapterView<?> parent) {}
                 });
+    }
+
+    private void addHelp(LinearLayout page) {
         LinearLayout help = Ui.card(this, page);
         Ui.heading(
                 this,
@@ -194,16 +211,6 @@ public final class MainActivity extends Activity {
                         13,
                         Ui.MUTED,
                         false));
-        addAbout(page);
-    }
-
-    private Spinner picker(String[] labels, String description) {
-        Spinner picker = new Spinner(this);
-        picker.setContentDescription(description);
-        picker.setAdapter(
-                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, labels));
-        Ui.field(this, picker);
-        return picker;
     }
 
     private void addAbout(LinearLayout page) {
@@ -259,7 +266,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 10
+        if (requestCode == REQUEST_IMAGE
                 && resultCode == RESULT_OK
                 && data != null
                 && data.getData() != null) {

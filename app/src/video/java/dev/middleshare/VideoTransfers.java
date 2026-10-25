@@ -25,6 +25,7 @@ final class VideoTransfers {
         void changed(Task task);
     }
 
+    private static final int MAX_PENDING_TRANSFERS = 20;
     private static final Map<String, Task> tasks = new LinkedHashMap<>();
     private static final Set<Observer> observers = new LinkedHashSet<>();
 
@@ -43,6 +44,10 @@ final class VideoTransfers {
             this.id = id;
             this.notificationId = notificationId;
             status = app.getString(R.string.transfer_starting);
+        }
+
+        boolean ready() {
+            return job != null && job.completed && job.error == null;
         }
 
         private File metadata() {
@@ -130,13 +135,13 @@ final class VideoTransfers {
         recover(context);
         long pending =
                 tasks.values().stream().filter(task -> !task.removed && task.job.completed).count();
-        if (pending >= 20)
+        if (pending >= MAX_PENDING_TRANSFERS)
             throw new IOException(context.getString(R.string.transfer_pending_limit));
         for (Task running : tasks.values())
             if (!running.removed && !running.job.completed)
                 throw new IOException(context.getString(R.string.transfer_already_running));
         String id = UUID.randomUUID().toString();
-        int notification = 2000 + (id.hashCode() & 0x3fffffff);
+        int notification = notificationId(id);
         Task task = new Task(context, id, notification);
         task.destination = destination;
         task.persist();
@@ -149,8 +154,16 @@ final class VideoTransfers {
         return task;
     }
 
+    private static boolean validId(String id) {
+        return id != null && id.matches("[a-f0-9-]{36}");
+    }
+
+    private static int notificationId(String id) {
+        return 2000 + (id.hashCode() & 0x3fffffff);
+    }
+
     static Task find(Context context, String id) {
-        if (id == null || !id.matches("[a-f0-9-]{36}")) return null;
+        if (!validId(id)) return null;
         if (tasks.containsKey(id)) return tasks.get(id);
         File file = new File(directory(context), id + ".json");
         if (!file.isFile() && !new File(file.getPath() + ".bak").isFile()) return null;
@@ -196,10 +209,9 @@ final class VideoTransfers {
             remove(task, false);
             return;
         }
-        if (id == null || !id.matches("[a-f0-9-]{36}")) return;
+        if (!validId(id)) return;
         new AtomicFile(new File(directory(context), id + ".json")).delete();
-        context.getSystemService(android.app.NotificationManager.class)
-                .cancel(2000 + (id.hashCode() & 0x3fffffff));
+        context.getSystemService(android.app.NotificationManager.class).cancel(notificationId(id));
     }
 
     static void observe(Observer observer) {

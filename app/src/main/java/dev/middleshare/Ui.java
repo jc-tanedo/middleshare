@@ -83,6 +83,16 @@ final class Ui {
         root.requestApplyInsets();
     }
 
+    static android.widget.Spinner picker(Activity activity, String[] labels, String description) {
+        android.widget.Spinner picker = new android.widget.Spinner(activity);
+        picker.setContentDescription(description);
+        picker.setAdapter(
+                new android.widget.ArrayAdapter<>(
+                        activity, android.R.layout.simple_spinner_dropdown_item, labels));
+        field(activity, picker);
+        return picker;
+    }
+
     static android.widget.Button button(Activity a, int label, boolean primary) {
         android.widget.Button button = new android.widget.Button(a);
         button.setText(label);

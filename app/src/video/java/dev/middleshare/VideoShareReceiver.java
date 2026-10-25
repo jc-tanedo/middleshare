@@ -31,7 +31,6 @@ public final class VideoShareReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         VideoTransfers.Task task =
                 VideoTransfers.find(context, intent.getStringExtra(VideoDownloadActivity.TRANSFER));
-        if (task != null && task.job.completed && task.job.error == null)
-            VideoTransfers.remove(task, true);
+        if (task != null && task.ready()) VideoTransfers.remove(task, true);
     }
 }

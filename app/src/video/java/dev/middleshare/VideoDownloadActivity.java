@@ -9,6 +9,8 @@ import java.util.Collections;
 
 /** Private UI for a service-owned download or a notification's direct, user-initiated handoff. */
 public class VideoDownloadActivity extends ShareActivity {
+    private static final int REQUEST_NOTIFICATIONS = 43;
+
     static final String TRANSFER = "dev.middleshare.TRANSFER";
     static final String OPEN = "dev.middleshare.TRANSFER_OPEN";
     static final String SEND_READY = "dev.middleshare.TRANSFER_SEND";
@@ -91,7 +93,9 @@ public class VideoDownloadActivity extends ShareActivity {
         if (isFinishing() || currentJob() == null || currentJob().dispatched) return;
         if (!currentJob().completed && VideoNotifications.shouldRequest(this)) {
             VideoNotifications.markPrompted(this);
-            requestPermissions(new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 43);
+            requestPermissions(
+                    new String[] {android.Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_NOTIFICATIONS);
             return;
         }
     }
@@ -99,7 +103,7 @@ public class VideoDownloadActivity extends ShareActivity {
     @Override
     public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(code, permissions, results);
-        if (code == 43 && VideoNotifications.allowed(this)) {
+        if (code == REQUEST_NOTIFICATIONS && VideoNotifications.allowed(this)) {
             if (task() != null && task.job.completed && !task.removed)
                 VideoNotifications.publish(this, task);
         }

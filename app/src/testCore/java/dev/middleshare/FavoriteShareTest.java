@@ -99,7 +99,7 @@ public class FavoriteShareTest {
         ComponentName batch = new ComponentName("example.batch", "example.batch.Chat");
         receiver(content, Intent.ACTION_SEND, "image/jpeg", true, "Content App");
         receiver(batch, Intent.ACTION_SEND_MULTIPLE, "image/png", false, "Batch App");
-        var apps = FavoritePreferences.receivers(context);
+        var apps = ShareDestinations.receivers(context);
         assertEquals(3, apps.size());
         assertEquals(
                 1,
@@ -147,7 +147,7 @@ public class FavoriteShareTest {
         assertFalse(info.enabled);
         assertTrue(ShareDestinations.receiverAllowed(context, info));
         assertTrue(
-                FavoritePreferences.receivers(context).stream()
+                ShareDestinations.receivers(context).stream()
                         .anyMatch(app -> alias.getClassName().equals(app.activityInfo.name)));
         SharedFile file =
                 new SharedFile(

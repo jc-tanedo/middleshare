@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - name: Test release and signing tools
+        run: python3 -m unittest discover -s tests
       - name: Validate version tag
         env:
           RELEASE_TAG: ${{ github.ref_name }}

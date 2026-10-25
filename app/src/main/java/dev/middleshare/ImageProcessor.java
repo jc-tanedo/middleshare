@@ -162,7 +162,7 @@ final class ImageProcessor {
                 context.getCacheDir()
                         .listFiles((dir, name) -> name.matches("video-[a-f0-9\\-]{36}"));
         if (jobs != null)
-            for (File job : jobs) if (job.lastModified() < cutoff) VideoDownloader.remove(job);
+            for (File job : jobs) if (job.lastModified() < cutoff) CacheFiles.deleteTree(job);
     }
 
     private static final class ImageTooLargeException extends RuntimeException {}

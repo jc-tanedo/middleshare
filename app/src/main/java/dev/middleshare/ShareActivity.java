@@ -1,6 +1,5 @@
 package dev.middleshare;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -12,7 +11,9 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-public class ShareActivity extends Activity implements ConversionJob.Listener {
+public class ShareActivity extends SheetActivity implements ConversionJob.Listener {
+    private static final int REQUEST_SHARE = 20;
+
     private ConversionJob job;
     private TextView progress;
     private TextView status;
@@ -22,11 +23,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     private ComponentName destination;
     private boolean resumed;
     private boolean sharing;
-
-    @Override
-    protected void attachBaseContext(android.content.Context base) {
-        super.attachBaseContext(Ui.themedContext(base));
-    }
 
     @Override
     public void onCreate(Bundle state) {
@@ -135,12 +131,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         } else page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Ui.layoutSheet(this);
-    }
-
     protected ConversionJob currentJob() {
         return job;
     }
@@ -211,7 +201,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                         false));
         Button retry = Ui.button(this, R.string.try_again, true);
         retry.setId(R.id.video_retry);
-        retry.setText(R.string.try_again);
         retry.setOnClickListener(v -> handOffVideo());
         page.addView(retry);
         VideoAddon.prompt(this, this::handOffVideo);
@@ -284,7 +273,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
             Intent targeted = ShareDestinations.outgoing(this, result.outputs, destination);
             if (targeted != null) {
                 try {
-                    startActivityForResult(targeted, 20);
+                    startActivityForResult(targeted, REQUEST_SHARE);
                     result.dispatched = true;
                     shareDispatched();
                     return;
@@ -300,7 +289,7 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
                     .show();
         }
         try {
-            startActivityForResult(shareChooser(result), 20);
+            startActivityForResult(shareChooser(result), REQUEST_SHARE);
             sharing = true;
             // A system chooser can be canceled. Keep service-owned files available for retry.
             if (!backgroundVideo()) result.dispatched = true;
@@ -319,8 +308,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
         page.addView(Ui.text(this, message, 16, Ui.MUTED, false));
         Ui.gap(this, page, 24);
         Button close = Ui.button(this, R.string.close, false);
-        close.setText(R.string.close);
-        close.setAllCaps(false);
         close.setOnClickListener(v -> cancelShare());
         page.addView(close, new LinearLayout.LayoutParams(-1, -2));
     }
@@ -328,6 +315,6 @@ public class ShareActivity extends Activity implements ConversionJob.Listener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 20) finish();
+        if (requestCode == REQUEST_SHARE) finish();
     }
 }

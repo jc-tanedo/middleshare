@@ -1,6 +1,5 @@
 package dev.middleshare;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +12,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 /** The format lookup starts only when Custom becomes the selected option. */
-public class VideoQualityActivity extends Activity implements VideoFormatsJob.Listener {
+public class VideoQualityActivity extends SheetActivity implements VideoFormatsJob.Listener {
+    private static final int REQUEST_NOTIFICATIONS = 42;
+
     private String link;
     private boolean notificationPrompted;
     private VideoQuality quality = VideoQuality.BEST;
@@ -34,11 +35,6 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
             this.quality = quality;
             this.selected = selected;
         }
-    }
-
-    @Override
-    protected void attachBaseContext(android.content.Context base) {
-        super.attachBaseContext(Ui.themedContext(base));
     }
 
     @Override
@@ -102,13 +98,11 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
         page.addView(formats);
         download = Ui.button(this, R.string.download_video, true);
         download.setId(R.id.video_download);
-        download.setText(R.string.download_video);
         download.setOnClickListener(v -> download());
         Ui.gap(this, page, 16);
         page.addView(download, new LinearLayout.LayoutParams(-1, -2));
         Ui.gap(this, page, 8);
         Button cancel = Ui.button(this, R.string.cancel, false);
-        cancel.setText(R.string.cancel);
         cancel.setOnClickListener(v -> finish());
         page.addView(cancel, new LinearLayout.LayoutParams(-1, -2));
         choices.setOnCheckedChangeListener(
@@ -130,12 +124,6 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
                             }
                         });
         selectQuality();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Ui.layoutSheet(this);
     }
 
     private void selectQuality() {
@@ -201,7 +189,9 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
         if (VideoNotifications.shouldRequest(this) && !notificationPrompted) {
             notificationPrompted = true;
             VideoNotifications.markPrompted(this);
-            requestPermissions(new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 42);
+            requestPermissions(
+                    new String[] {android.Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_NOTIFICATIONS);
             return;
         }
         download.setEnabled(false);
@@ -212,7 +202,7 @@ public class VideoQualityActivity extends Activity implements VideoFormatsJob.Li
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (requestCode == 42) download();
+        if (requestCode == REQUEST_NOTIFICATIONS) download();
     }
 
     @Override

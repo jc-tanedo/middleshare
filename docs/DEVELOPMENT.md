@@ -5,6 +5,7 @@
 Use Android Studio or a full JDK 17/21, Android SDK platform 35, build-tools 35.0.0, and platform-tools. Set `ANDROID_HOME`, or `sdk.dir` in ignored `local.properties`.
 
 ```sh
+python3 -m unittest discover -s tests
 ./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
 adb install -r app/build/outputs/apk/core/debug/app-core-universal-debug.apk
 # Optional; both debug APKs must come from the same build:
@@ -16,6 +17,12 @@ The Gradle wrapper pins and verifies Gradle 8.11.1. Release `core` uses `dev.mid
 The image/UI implementation remains Java with framework views and native image codecs. Only the video flavor adds the youtubedl-android and FFmpeg libraries. The core dependency graph contains no third-party runtime libraries. ABI-specific add-on packages reduce download size. The bundled extractor is SHA-256 checked before use, including when replacing an older extracted copy. TLS verification remains enabled.
 
 Tests cover add-on signature/version checks, missing-add-on prompts and retry, native image codecs on Android 14, Android 15 intent handling, device/default/override themes, link parsing, output MIME/URI permissions, download request policy, cancellation, partial cleanup, size limits, storage preflight, and bundled extractor integrity. The downloader engine and Android storage service are replaced with fixtures in JVM tests; these tests do not establish that live sites or Android native subprocesses work. Use the emulator/device smoke test for integration checks.
+
+## Code conventions and review
+
+Use the existing AOSP Java style and `.editorconfig`. Keep presentation in activity/view classes, receiver discovery in `ShareDestinations`, and persisted preferences in `Settings`. Reuse the shared theme/drawer bases, `Ui` factories, and cache helpers when their behavior matches the caller. Keep different cancellation and security boundaries explicit rather than merging them just because the code looks similar.
+
+Both CI workflows run `python3 -m unittest discover -s tests` for the release/signing tools. Java tests and lint cover both flavors. The [25 October 2026 code quality audit](CODE-QUALITY-AUDIT-2026-10-25.md) records the cleanup, intentional boundaries, remaining follow-ups, and validation limits.
 
 ## Source layout
 

@@ -1,9 +1,7 @@
 package dev.middleshare;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,12 +21,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 
-public final class AboutActivity extends Activity {
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(Ui.themedContext(base));
-    }
-
+public final class AboutActivity extends ThemedActivity {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -42,8 +35,6 @@ public final class AboutActivity extends Activity {
         list.setPadding(Ui.dp(this, 12), 0, Ui.dp(this, 12), Ui.dp(this, 24));
         Ui.installScreen(this, list);
         Button back = Ui.button(this, R.string.back, false);
-        back.setText(R.string.back);
-        back.setAllCaps(false);
         back.setOnClickListener(v -> finish());
         page.addView(back);
         Ui.gap(this, page, 16);
@@ -58,8 +49,6 @@ public final class AboutActivity extends Activity {
         Ui.gap(this, page, 12);
         page.addView(Ui.text(this, getString(R.string.about_intro), 15, Ui.MUTED, false));
         Button projectLicense = Ui.button(this, R.string.app_license, false);
-        projectLicense.setText(R.string.app_license);
-        projectLicense.setAllCaps(false);
         projectLicense.setOnClickListener(
                 v ->
                         showLicenses(
@@ -68,8 +57,6 @@ public final class AboutActivity extends Activity {
         page.addView(projectLicense);
         Ui.gap(this, page, 8);
         Button projectSource = Ui.button(this, R.string.project_source, false);
-        projectSource.setText(R.string.project_source);
-        projectSource.setAllCaps(false);
         projectSource.setOnClickListener(
                 v -> openSource("https://github.com/jc-tanedo/middleshare"));
         page.addView(projectSource);
