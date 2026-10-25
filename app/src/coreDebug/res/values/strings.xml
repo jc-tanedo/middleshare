@@ -1,0 +1,5 @@
+<resources>
+    <string name="debug_app_name">MiddleShare Debug</string>
+    <string name="favorite_share_label">MiddleShare Favorite Debug</string>
+    <string name="video_releases">Get video debug APK</string>
+</resources>

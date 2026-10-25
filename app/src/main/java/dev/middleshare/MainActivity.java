@@ -148,13 +148,13 @@ public final class MainActivity extends Activity {
                         Intent launch =
                                 getPackageManager().getLaunchIntentForPackage(VideoAddon.PACKAGE);
                         if (launch != null) startActivity(launch);
-                        else VideoAddon.releases(this);
+                        else VideoAddon.downloads(this);
                     });
             videos.addView(tools, new LinearLayout.LayoutParams(-1, -2));
         } else {
             Ui.gap(this, videos, 8);
             Button releases = Ui.button(this, R.string.video_releases, false);
-            releases.setOnClickListener(v -> VideoAddon.releases(this));
+            releases.setOnClickListener(v -> VideoAddon.downloads(this));
             videos.addView(releases, new LinearLayout.LayoutParams(-1, -2));
         }
 

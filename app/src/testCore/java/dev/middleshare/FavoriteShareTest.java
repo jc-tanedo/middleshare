@@ -133,6 +133,41 @@ public class FavoriteShareTest {
     }
 
     @Test
+    public void enabledAliasWithDisabledManifestDefaultIsSelectableAndCanReceiveAFile()
+            throws Exception {
+        ComponentName alias = new ComponentName("example.dynamic", "example.dynamic.ShareAlias");
+        receiver(alias, Intent.ACTION_SEND, "image/png", false, "Dynamic App");
+        var pm = context.getPackageManager();
+        var info = shadowOf(pm).addActivityIfNotPresent(alias);
+        info.enabled = false;
+        pm.setComponentEnabledSetting(
+                alias,
+                android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                android.content.pm.PackageManager.DONT_KILL_APP);
+        assertFalse(info.enabled);
+        assertTrue(ShareDestinations.receiverAllowed(context, info));
+        assertTrue(
+                FavoritePreferences.receivers(context).stream()
+                        .anyMatch(app -> alias.getClassName().equals(app.activityInfo.name)));
+        SharedFile file =
+                new SharedFile(
+                        context,
+                        new File(ShareProvider.directory(context), UUID.randomUUID() + ".png"),
+                        "image/png");
+        assertNotNull(
+                ShareDestinations.outgoing(
+                        context, java.util.Collections.singletonList(file), alias));
+        pm.setComponentEnabledSetting(
+                alias,
+                android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                android.content.pm.PackageManager.DONT_KILL_APP);
+        assertFalse(ShareDestinations.receiverAllowed(context, info));
+        assertNull(
+                ShareDestinations.outgoing(
+                        context, java.util.Collections.singletonList(file), alias));
+    }
+
+    @Test
     public void contentReceiverGetsReadableContentIntentAndBatchOnlyReceiverRejectsSingleFile()
             throws Exception {
         ComponentName content = new ComponentName("example.content", "example.content.Chat");
@@ -207,7 +242,7 @@ public class FavoriteShareTest {
             assertEquals(target.flattenToString(), next.getStringExtra(VideoAddon.DESTINATION));
             var permission =
                     context.getPackageManager()
-                            .getPermissionInfo("dev.middleshare.permission.SHARE_FAVORITE", 0);
+                            .getPermissionInfo(VideoAddon.FAVORITE_PERMISSION, 0);
             assertEquals(
                     android.content.pm.PermissionInfo.PROTECTION_SIGNATURE,
                     permission.protectionLevel

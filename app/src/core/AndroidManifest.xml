@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <permission android:name="dev.middleshare.permission.SHARE_FAVORITE" android:protectionLevel="signature" />
-    <uses-permission android:name="dev.middleshare.permission.SHARE_FAVORITE" />
+    <permission android:name="${applicationId}.permission.SHARE_FAVORITE" android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.permission.SHARE_FAVORITE" />
     <queries>
         <intent><action android:name="android.intent.action.SEND" /><data android:mimeType="image/*" /></intent>
         <intent><action android:name="android.intent.action.SEND" /><data android:mimeType="video/*" /></intent>

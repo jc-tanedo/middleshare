@@ -25,7 +25,7 @@ Presets start without a separate format-list lookup. Merely opening settings or 
 
 A Custom default prompts for a new choice on each shared link. Exact format IDs are specific to that link and are never saved in preferences. Results are reused within the share, including across rotation; leaving Custom cancels an unfinished lookup. If loading fails, tap Custom again to retry or use a preset. Resolution caps apply when the source reports dimensions; sources with unknown resolution may pass through. All choices retain the 256 MiB final-file, temporary-storage, and download-time limits below. Full is not an unlimited file-size setting.
 
-Use matching main/add-on APKs from release 0.8.3 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
+Use matching main/add-on APKs from release 0.8.4 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
 
 ## Background downloads
 
@@ -41,7 +41,7 @@ Ready-file metadata and the optional favorite are saved privately without the so
 
 ## Favorite share shortcut
 
-In the main app, choose **Favorite app**. The adaptive icon grid shows each receiver’s label and its owning app name. It includes image/video receivers that accept content URIs, exact media types, and image batches; MiddleShare itself is excluded. A batch-only favorite falls back to the native share sheet for single-file shares. You can change or clear the favorite at any time.
+In the main app, choose **Favorite app**. The adaptive icon grid shows each receiver’s label and its owning app name. It includes image/video receivers that accept content URIs, exact media types, and image batches; MiddleShare itself is excluded. A batch-only favorite falls back to the native share sheet for single-file shares. Android’s current enabled state is respected for apps that dynamically switch share aliases. You can change or clear the favorite at any time.
 
 Share to **MiddleShare Favorite** to process images and open the configured app without another destination selection. Video links use the configured site's quality (or global fallback) and saved favorite automatically; Custom still opens the per-link format picker. The drawer stays open by default; minimized video downloads finish through the notification as above. If no favorite is set, the shortcut uses the ordinary share flow. If the favorite cannot receive a particular image/batch/video format, choose another compatible receiver.
 
@@ -59,3 +59,7 @@ The favorite is a local app/activity preference. Sender-supplied destination ext
 WebP is detected from contents rather than the supplied MIME type or extension. Animated WebP becomes a still image. WebP metadata is not copied; decoding applies supported orientation and sRGB conversion. Images have a 64 MiB input limit and a decoding pixel budget of the smaller of 16 million pixels and `maxHeapBytes / 16`. Oversized images are rejected instead of silently resized.
 
 Some links require sign-in or site-specific access, or may stop working when a site changes. This app does not provide a login/cookie flow. Image URLs are not downloaded as images by the video processor. Updated extractors ship in new app builds; see [THIRD_PARTY.md](../THIRD_PARTY.md) for the pinned yt-dlp release and checksum.
+
+## Debug installations
+
+Debug APKs have separate `.debug` application IDs and Debug launcher/share labels. Install both debug APKs together; they do not use or replace a release installation. Settings and favorites are separate. The debug main app requires the matching debug add-on, signed with the same debug certificate.

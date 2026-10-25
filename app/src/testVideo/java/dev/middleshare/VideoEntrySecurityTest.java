@@ -62,7 +62,7 @@ public class VideoEntrySecurityTest {
         var favorite =
                 pm.getActivityInfo(new ComponentName(context, FavoriteVideoActivity.class), 0);
         assertTrue(favorite.exported);
-        assertEquals("dev.middleshare.permission.SHARE_FAVORITE", favorite.permission);
+        assertEquals(VideoAddon.FAVORITE_PERMISSION, favorite.permission);
     }
 
     @Test

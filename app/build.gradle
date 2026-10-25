@@ -8,8 +8,9 @@ android {
         applicationId 'dev.middleshare'
         minSdk 28
         targetSdk 35
-        versionCode 13
-        versionName '0.8.3'
+        versionCode 14
+        versionName '0.8.4'
+        manifestPlaceholders = [videoPackage: 'dev.middleshare.video', favoritePermission: 'dev.middleshare.permission.SHARE_FAVORITE']
         ndk { abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64' }
     }
     buildFeatures { buildConfig true }
@@ -27,6 +28,14 @@ android {
         }
     }
     signingConfigs {
+        debug {
+            if (System.getenv('ANDROID_DEBUG_KEYSTORE_PATH')) {
+                storeFile file(System.getenv('ANDROID_DEBUG_KEYSTORE_PATH'))
+                storePassword System.getenv('ANDROID_DEBUG_KEYSTORE_PASSWORD')
+                keyAlias 'middleshare-debug'
+                keyPassword System.getenv('ANDROID_DEBUG_KEYSTORE_PASSWORD')
+            }
+        }
         release {
             if (System.getenv('ANDROID_KEYSTORE_PATH')) {
                 storeFile file(System.getenv('ANDROID_KEYSTORE_PATH'))
@@ -37,6 +46,10 @@ android {
         }
     }
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            manifestPlaceholders = [videoPackage: 'dev.middleshare.video.debug', favoritePermission: 'dev.middleshare.debug.permission.SHARE_FAVORITE']
+        }
         release {
             if (System.getenv('ANDROID_KEYSTORE_PATH')) signingConfig signingConfigs.release
             minifyEnabled true

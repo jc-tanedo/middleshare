@@ -12,9 +12,15 @@ import android.widget.Toast;
 
 /** Explicit, signed handoff; links never reach an unverified add-on. */
 final class VideoAddon {
-    static final String PACKAGE = "dev.middleshare.video";
+    static final String CORE_PACKAGE = "dev.middleshare" + (BuildConfig.DEBUG ? ".debug" : "");
+    static final String PACKAGE = "dev.middleshare.video" + (BuildConfig.DEBUG ? ".debug" : "");
+    static final String FAVORITE_PERMISSION = CORE_PACKAGE + ".permission.SHARE_FAVORITE";
     static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final int MIN_VERSION = 13;
+    static final String DOWNLOADS =
+            BuildConfig.DEBUG
+                    ? "https://github.com/jc-tanedo/middleshare/actions/workflows/android.yml"
+                    : RELEASES;
+    static final int MIN_VERSION = 14;
     static final String DESTINATION = "dev.middleshare.DESTINATION";
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String FORMAT = "dev.middleshare.FORMAT";
@@ -54,9 +60,9 @@ final class VideoAddon {
                 .putExtra(DESTINATION, favorite.flattenToString());
     }
 
-    static void releases(Activity activity) {
+    static void downloads(Activity activity) {
         try {
-            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(RELEASES)));
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(DOWNLOADS)));
         } catch (ActivityNotFoundException e) {
             Toast.makeText(activity, R.string.no_browser, Toast.LENGTH_LONG).show();
         }
@@ -66,13 +72,21 @@ final class VideoAddon {
         new AlertDialog.Builder(activity)
                 .setTitle("Add video downloads")
                 .setMessage(
-                        "Install the optional MiddleShare Video APK from the latest release. Choose"
-                            + " the APK for your device (usually arm64-v8a), or universal if"
-                            + " unsure.\n\n"
-                            + "It is a one-time installation until an update is needed. Image"
-                            + " conversion works without it. After installing, return here and tap"
-                            + " Try again. Use the main app and add-on from the same release.")
-                .setPositiveButton("Open Releases", (dialog, which) -> releases(activity))
+                        BuildConfig.DEBUG
+                                ? "Install MiddleShare Video Debug from the same Actions build as"
+                                        + " this main app, using the APK for your device (usually"
+                                        + " arm64-v8a). Then return and tap Try again. A release"
+                                        + " add-on cannot pair with this debug installation."
+                                : "Install the optional MiddleShare Video APK from the latest"
+                                        + " release. Choose the APK for your device (usually"
+                                        + " arm64-v8a), or universal if unsure.\n\n"
+                                        + "It is a one-time installation until an update is needed."
+                                        + " Image conversion works without it. After installing,"
+                                        + " return here and tap Try again. Use the main app and"
+                                        + " add-on from the same release.")
+                .setPositiveButton(
+                        BuildConfig.DEBUG ? "Open debug builds" : "Open Releases",
+                        (dialog, which) -> downloads(activity))
                 .setNeutralButton("Try again", (dialog, which) -> retry.run())
                 .setNegativeButton("Cancel", (dialog, which) -> activity.finish())
                 .show();

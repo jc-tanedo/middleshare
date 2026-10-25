@@ -30,14 +30,23 @@ public class VideoAddonTest {
         context = RuntimeEnvironment.getApplication();
         var main =
                 context.getPackageManager()
-                        .getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES);
+                        .getPackageInfo(
+                                context.getPackageName(),
+                                PackageManager.GET_SIGNATURES
+                                        | PackageManager.GET_PROVIDERS
+                                        | PackageManager.GET_ACTIVITIES
+                                        | PackageManager.GET_PERMISSIONS);
         main.signatures = new Signature[] {new Signature(new byte[] {1})};
         shadowOf(context.getPackageManager()).installPackage(main);
     }
 
     private void install(int version, int signature, boolean enabled) {
+        install(VideoAddon.PACKAGE, version, signature, enabled);
+    }
+
+    private void install(String packageName, int version, int signature, boolean enabled) {
         PackageInfo addon = new PackageInfo();
-        addon.packageName = VideoAddon.PACKAGE;
+        addon.packageName = packageName;
         addon.setLongVersionCode(version);
         addon.signatures = new Signature[] {new Signature(new byte[] {(byte) signature})};
         addon.applicationInfo = new ApplicationInfo();
@@ -51,6 +60,23 @@ public class VideoAddonTest {
         activity.exported = true;
         addon.activities = new ActivityInfo[] {activity};
         shadowOf(context.getPackageManager()).installPackage(addon);
+    }
+
+    @Test
+    public void debugPairHasIsolatedPackagesProviderAndFavoritePermission() throws Exception {
+        assertEquals("dev.middleshare.debug", context.getPackageName());
+        assertEquals("dev.middleshare.video.debug", VideoAddon.PACKAGE);
+        assertEquals(
+                "dev.middleshare.debug.permission.SHARE_FAVORITE", VideoAddon.FAVORITE_PERMISSION);
+        var provider =
+                context.getPackageManager()
+                        .getProviderInfo(
+                                new android.content.ComponentName(context, ShareProvider.class), 0);
+        assertEquals("dev.middleshare.debug.files", provider.authority);
+        install("dev.middleshare.video", VideoAddon.MIN_VERSION, 1, true);
+        assertFalse(VideoAddon.available(context));
+        install(VideoAddon.MIN_VERSION, 1, true);
+        assertTrue(VideoAddon.available(context));
     }
 
     @Test
@@ -106,7 +132,7 @@ public class VideoAddonTest {
             shadowOf(android.os.Looper.getMainLooper()).idle();
             var releases = shadowOf(controller.get()).getNextStartedActivity();
             assertEquals(Intent.ACTION_VIEW, releases.getAction());
-            assertEquals(VideoAddon.RELEASES, releases.getDataString());
+            assertEquals(VideoAddon.DOWNLOADS, releases.getDataString());
             install(VideoAddon.MIN_VERSION, 1, true);
             controller.get().findViewById(R.id.video_retry).performClick();
             assertEquals(

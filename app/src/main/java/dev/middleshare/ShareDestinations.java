@@ -12,8 +12,7 @@ import java.util.List;
 final class ShareDestinations {
     static boolean available(Context context, ComponentName target, Intent payload) {
         if (target == null) return false;
-        if (target.getPackageName().equals("dev.middleshare")
-                || target.getPackageName().equals(VideoAddon.PACKAGE)) return false;
+        if (isMiddleShare(target.getPackageName())) return false;
         for (ResolveInfo candidate :
                 context.getPackageManager()
                         .queryIntentActivities(payload, PackageManager.MATCH_DEFAULT_ONLY)) {
@@ -29,14 +28,50 @@ final class ShareDestinations {
         return activity != null
                 && activity.name != null
                 && activity.packageName != null
-                && !activity.packageName.equals("dev.middleshare")
-                && !activity.packageName.equals(VideoAddon.PACKAGE)
-                && activity.enabled
+                && !isMiddleShare(activity.packageName)
+                && componentEnabled(context, activity)
                 && activity.exported
-                && (activity.applicationInfo == null || activity.applicationInfo.enabled)
+                && applicationEnabled(context, activity)
                 && (activity.permission == null
                         || context.checkSelfPermission(activity.permission)
                                 == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private static boolean isMiddleShare(String name) {
+        return "dev.middleshare".equals(name)
+                || "dev.middleshare.video".equals(name)
+                || "dev.middleshare.debug".equals(name)
+                || "dev.middleshare.video.debug".equals(name);
+    }
+
+    private static boolean enabled(int setting, boolean manifestDefault) {
+        return setting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                || (setting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT && manifestDefault);
+    }
+
+    private static boolean componentEnabled(Context context, android.content.pm.ActivityInfo info) {
+        try {
+            // An enabled alias can still report enabled=false from its manifest. This override
+            // is also important when a receiver is disabled after the grid has been opened.
+            return enabled(
+                    context.getPackageManager()
+                            .getComponentEnabledSetting(
+                                    new ComponentName(info.packageName, info.name)),
+                    info.enabled);
+        } catch (IllegalArgumentException missing) {
+            return false;
+        }
+    }
+
+    private static boolean applicationEnabled(
+            Context context, android.content.pm.ActivityInfo info) {
+        try {
+            return enabled(
+                    context.getPackageManager().getApplicationEnabledSetting(info.packageName),
+                    info.applicationInfo == null || info.applicationInfo.enabled);
+        } catch (IllegalArgumentException missing) {
+            return false;
+        }
     }
 
     static String label(Context context, ComponentName target) {
