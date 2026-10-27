@@ -38,7 +38,7 @@ The workflow refuses to publish without these secrets. It uses the job's built-i
 
 ## Cut a release
 
-1. Update `versionName` and increment `versionCode` in `app/build.gradle`. Commit and push the change to `main`.
+1. Update `versionName` and increment `versionCode` in `app/build.gradle`. Commit and merge the change into `main`. Release notes in `.github/release-notes.md` are a template: `${version}` comes from this same `versionName`, and `${prerelease_notice}` adds a preview label only for prereleases. Keep those placeholders when editing the release description; APK filenames and the release title use the same version automatically.
 2. Tag that commit with the exact matching version. Stable `vMAJOR.MINOR.PATCH` tags and preview suffixes `-alpha.N`, `-beta.N`, and `-rc.N` (starting at 1) are supported:
 
    ```sh
