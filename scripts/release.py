@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+from string import Template
 
 from signing import write_keystore
 
@@ -108,6 +109,14 @@ def collect():
     print(f"Verified and staged {len(lines)} signed APKs.")
 
 
+def release_notes(ver):
+    template = (ROOT / ".github/release-notes.md").read_text(encoding="utf-8")
+    return Template(template).substitute(
+        version=ver,
+        prerelease_notice="**Prerelease:** " if "-" in ver else "",
+    )
+
+
 def publish():
     ver = version()
     directory = ROOT / "release-assets"
@@ -115,11 +124,13 @@ def publish():
     checksums = directory / "SHA256SUMS"
     if len(apks) != len(EXPECTED_ABIS) + 1 or not checksums.is_file():
         raise ValueError("Collect the five verified APKs and checksums before publishing.")
+    notes = directory / "release-notes.md"
+    notes.write_text(release_notes(ver), encoding="utf-8")
     command = [
         "gh", "release", "create", "v" + ver,
         *(str(path) for path in apks), str(checksums),
         "--verify-tag", "--title", "MiddleShare v" + ver,
-        "--generate-notes", "--notes-file", str(ROOT / ".github/release-notes.md"),
+        "--generate-notes", "--notes-file", str(notes),
     ]
     if "-" in ver:
         command.append("--prerelease")

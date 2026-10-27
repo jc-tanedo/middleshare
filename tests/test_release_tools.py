@@ -57,6 +57,11 @@ class PrereleaseTests(unittest.TestCase):
         root = Path(directory)
         (root / "app").mkdir()
         (root / "app/build.gradle").write_text(f"versionName '{version}'", encoding="utf-8")
+        (root / ".github").mkdir()
+        (root / ".github/release-notes.md").write_text(
+            (release.ROOT / ".github/release-notes.md").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
         return root
 
     def test_preview_suffixes_must_match_the_committed_version(self):
@@ -94,10 +99,36 @@ class PrereleaseTests(unittest.TestCase):
                     with patch.dict(os.environ, {"RELEASE_TAG": "v" + version}):
                         with patch.object(release.subprocess, "run") as run:
                             release.publish()
+                notes = (assets / "release-notes.md").read_text(encoding="utf-8")
+                self.assertIn(f"MiddleShare {version} fixes", notes)
+                self.assertIn(f"middleshare-{version}.apk", notes)
+                self.assertIn(f"middleshare-video-{version}-arm64-v8a.apk", notes)
+                self.assertEqual(notes.startswith("**Prerelease:** "), "-" in version)
+                self.assertNotIn("${", notes)
+                self.assertEqual(
+                    run.call_args.args[0][run.call_args.args[0].index("--notes-file") + 1],
+                    str(assets / "release-notes.md"),
+                )
                 command = run.call_args.args[0]
                 self.assertEqual(command[:4], ["gh", "release", "create", "v" + version])
                 self.assertEqual("--prerelease" in command, "-" in version)
                 self.assertIn("--verify-tag", command)
+
+    def test_invalid_notes_template_blocks_publication(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory, "1.2.3")
+            assets = root / "release-assets"
+            assets.mkdir()
+            for number in range(5):
+                (assets / f"fixture-{number}.apk").write_bytes(b"fixture")
+            (assets / "SHA256SUMS").write_text("fixture", encoding="utf-8")
+            (root / ".github/release-notes.md").write_text("${unknown}", encoding="utf-8")
+            with patch.object(release, "ROOT", root):
+                with patch.dict(os.environ, {"RELEASE_TAG": "v1.2.3"}):
+                    with patch.object(release.subprocess, "run") as run:
+                        with self.assertRaises(KeyError):
+                            release.publish()
+                        run.assert_not_called()
 
     def test_publication_requires_collected_assets(self):
         with tempfile.TemporaryDirectory() as directory:
