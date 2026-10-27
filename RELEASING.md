@@ -14,7 +14,7 @@ Configure repository **variable** `S3_ACCESS_KEY_ID` and repository **secret** `
 
 Each run summary contains individual APK downloads and a manifest with SHA-256 checksums. Links expire after 24 hours and can stop working earlier if their build is pruned. To renew them without rebuilding, open **Actions → Artifact retention → Run workflow → download-links**. Choose **test-storage** to test listing, a 9 MiB multipart upload, presigned download/checksum, anonymous-access denial, and deletion of the test object. The default **cleanup** operation keeps the newest two complete builds of each type.
 
-The uploader requires Python 3.10+. Its hash-pinned, pure-Python Boto3 SDK is cached in the runner's tool cache without pip, sudo, or system Python changes. These dependencies and their bundled notices appear in About as development-only tools; their code is not included in either APK. Fork/Dependabot pull requests still run build checks but do not receive storage credentials or upload private artifacts.
+The uploader requires Python 3.10+; the shared runner setup prepares cached Python 3.12 automatically. Its hash-pinned, pure-Python Boto3 SDK is cached in the runner's tool cache without pip, sudo, or system Python changes. These dependencies and their bundled notices appear in About as development-only tools; their code is not included in either APK. Fork/Dependabot pull requests still run build checks but do not receive storage credentials or upload private artifacts.
 
 ## One-time signing setup
 
