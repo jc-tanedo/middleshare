@@ -416,11 +416,19 @@ def main():
         prune(client, config, active_run_ids(config["repo"]), status)
 
 
+def report_error(message):
+    """Expose sanitized failures in Actions annotations as well as the job log."""
+    print(message, file=sys.stderr)
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::error::{escaped}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     try:
         main()
     except ArtifactError as error:
-        print(f"Artifact storage: {error}", file=sys.stderr)
+        report_error(f"Artifact storage: {error}")
         sys.exit(1)
     except Exception as error:
         # SDK exceptions can contain request details. Never print signed URLs or credentials.
@@ -432,8 +440,7 @@ if __name__ == "__main__":
             code = f"HTTP{error.code}"
         if not re.fullmatch(r"[\w.-]{1,80}", str(code)):
             code = "S3Error"
-        print(
-            f"Artifact storage failed ({code}). Check endpoint, bucket permissions, and runner connectivity.",
-            file=sys.stderr,
+        report_error(
+            f"Artifact storage failed ({code}). Check endpoint, bucket permissions, and runner connectivity."
         )
         sys.exit(1)
