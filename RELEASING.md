@@ -29,7 +29,7 @@ The workflow refuses to publish without these secrets. It uses the job's built-i
 ## Cut a release
 
 1. Update `versionName` and increment `versionCode` in `app/build.gradle`. Commit and push the change to `main`.
-2. Tag that commit with the exact matching version (stable `vMAJOR.MINOR.PATCH` tags are supported):
+2. Tag that commit with the exact matching version. Stable `vMAJOR.MINOR.PATCH` tags and preview suffixes `-alpha.N`, `-beta.N`, and `-rc.N` (starting at 1) are supported:
 
    ```sh
    git tag -a v0.8.5 -m "MiddleShare 0.8.5"
@@ -37,6 +37,8 @@ The workflow refuses to publish without these secrets. It uses the job's built-i
    ```
 
 3. Wait for **Actions → Release**. The published release includes the small main APK, four video add-on APKs (three ABIs plus universal), checksums, install instructions, and GitHub's source archives. The app links to `https://github.com/jc-tanedo/middleshare/releases/latest`.
+
+Preview tags such as `v0.8.5-rc.1` require the matching `versionName '0.8.5-rc.1'` and are automatically published as GitHub prereleases. They do not replace the latest stable release. Install them from their specific release page. Increase `versionCode` again when building the final stable version so it can update preview installations.
 
 Tags that do not match the committed app version fail before building. Use a new version/tag after publication; do not overwrite published tags or replace their APKs. A failed run before publication can be rerun after fixing repository secrets. If publication was partially completed, inspect the existing release before retrying; the workflow intentionally does not overwrite releases.
 

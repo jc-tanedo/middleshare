@@ -61,8 +61,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          gh release create "$RELEASE_TAG" release-assets/* --verify-tag --title "MiddleShare $RELEASE_TAG" --generate-notes --notes-file .github/release-notes.md
+        run: python3 scripts/release.py publish
       - name: Remove signing key
         if: always()
         run: rm -f "$RUNNER_TEMP/middleshare-release.jks"

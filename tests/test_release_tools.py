@@ -52,6 +52,64 @@ class CertificateTests(unittest.TestCase):
                         release.version()
 
 
+class PrereleaseTests(unittest.TestCase):
+    def project(self, directory, version):
+        root = Path(directory)
+        (root / "app").mkdir()
+        (root / "app/build.gradle").write_text(f"versionName '{version}'", encoding="utf-8")
+        return root
+
+    def test_preview_suffixes_must_match_the_committed_version(self):
+        for suffix in ("alpha.1", "beta.2", "rc.1"):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory() as directory:
+                version = "1.2.3-" + suffix
+                root = self.project(directory, version)
+                with patch.object(release, "ROOT", root):
+                    with patch.dict(os.environ, {"RELEASE_TAG": "v" + version}):
+                        self.assertEqual(version, release.version())
+                    with patch.dict(os.environ, {"RELEASE_TAG": "v1.2.3"}):
+                        with self.assertRaises(ValueError):
+                            release.version()
+
+    def test_invalid_preview_suffixes_are_rejected_even_if_the_version_matches(self):
+        for suffix in ("rc", "rc.0", "rc.01", "preview.1", "rc.1.extra"):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory() as directory:
+                version = "1.2.3-" + suffix
+                root = self.project(directory, version)
+                with patch.object(release, "ROOT", root):
+                    with patch.dict(os.environ, {"RELEASE_TAG": "v" + version}):
+                        with self.assertRaises(ValueError):
+                            release.version()
+
+    def test_publication_marks_only_preview_versions_as_prereleases(self):
+        for version in ("1.2.3", "1.2.3-rc.1"):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                root = self.project(directory, version)
+                assets = root / "release-assets"
+                assets.mkdir()
+                for number in range(5):
+                    (assets / f"fixture-{number}.apk").write_bytes(b"fixture")
+                (assets / "SHA256SUMS").write_text("fixture", encoding="utf-8")
+                with patch.object(release, "ROOT", root):
+                    with patch.dict(os.environ, {"RELEASE_TAG": "v" + version}):
+                        with patch.object(release.subprocess, "run") as run:
+                            release.publish()
+                command = run.call_args.args[0]
+                self.assertEqual(command[:4], ["gh", "release", "create", "v" + version])
+                self.assertEqual("--prerelease" in command, "-" in version)
+                self.assertIn("--verify-tag", command)
+
+    def test_publication_requires_collected_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory, "1.2.3-rc.1")
+            with patch.object(release, "ROOT", root):
+                with patch.dict(os.environ, {"RELEASE_TAG": "v1.2.3-rc.1"}):
+                    with patch.object(release.subprocess, "run") as run:
+                        with self.assertRaises(ValueError):
+                            release.publish()
+                        run.assert_not_called()
+
+
 class SigningFileTests(unittest.TestCase):
     def test_decodes_wrapped_base64_and_creates_private_file(self):
         with tempfile.TemporaryDirectory() as directory:

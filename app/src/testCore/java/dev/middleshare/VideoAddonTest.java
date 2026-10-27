@@ -25,6 +25,19 @@ import org.robolectric.shadows.ShadowAlertDialog;
 public class VideoAddonTest {
     private Context context;
 
+    @Test
+    public void downloadPageMatchesTheBuildChannel() {
+        assertEquals(
+                "https://github.com/jc-tanedo/middleshare/releases/latest",
+                VideoAddon.downloadsUrl(false, "0.8.5"));
+        assertEquals(
+                "https://github.com/jc-tanedo/middleshare/releases/tag/v0.8.5-rc.1",
+                VideoAddon.downloadsUrl(false, "0.8.5-rc.1"));
+        assertEquals(
+                "https://github.com/jc-tanedo/middleshare/actions/workflows/android.yml",
+                VideoAddon.downloadsUrl(true, "0.8.5-rc.1"));
+    }
+
     @Before
     public void setup() throws Exception {
         context = RuntimeEnvironment.getApplication();

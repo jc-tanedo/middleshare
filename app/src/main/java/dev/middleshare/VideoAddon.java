@@ -15,17 +15,20 @@ final class VideoAddon {
     static final String CORE_PACKAGE = "dev.middleshare" + (BuildConfig.DEBUG ? ".debug" : "");
     static final String PACKAGE = "dev.middleshare.video" + (BuildConfig.DEBUG ? ".debug" : "");
     static final String FAVORITE_PERMISSION = CORE_PACKAGE + ".permission.SHARE_FAVORITE";
-    static final String RELEASES = "https://github.com/jc-tanedo/middleshare/releases/latest";
-    static final String DOWNLOADS =
-            BuildConfig.DEBUG
-                    ? "https://github.com/jc-tanedo/middleshare/actions/workflows/android.yml"
-                    : RELEASES;
+    private static final String REPOSITORY = "https://github.com/jc-tanedo/middleshare";
+    static final String RELEASES = REPOSITORY + "/releases/latest";
+    static final String DOWNLOADS = downloadsUrl(BuildConfig.DEBUG, BuildConfig.VERSION_NAME);
     // Earlier release add-ons can crash while unpacking the native runtime.
     static final int MIN_VERSION = 15;
     static final String DESTINATION = "dev.middleshare.DESTINATION";
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String FORMAT = "dev.middleshare.FORMAT";
     static final String AUDIO = "dev.middleshare.AUDIO";
+
+    static String downloadsUrl(boolean debug, String version) {
+        if (debug) return REPOSITORY + "/actions/workflows/android.yml";
+        return version.contains("-") ? REPOSITORY + "/releases/tag/v" + version : RELEASES;
+    }
 
     static boolean available(Context context) {
         try {

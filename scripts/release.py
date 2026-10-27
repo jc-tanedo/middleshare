@@ -22,7 +22,10 @@ def version():
     tag = os.environ.get("RELEASE_TAG", "")
     source = (ROOT / "app/build.gradle").read_text(encoding="utf-8")
     expected = re.search(r"versionName '([^']+)'", source).group(1)
-    if not re.fullmatch(r"v\d+\.\d+\.\d+", tag) or tag != "v" + expected:
+    if (
+        not re.fullmatch(r"v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.[1-9]\d*)?", tag)
+        or tag != "v" + expected
+    ):
         raise ValueError(f"Tag must equal v{expected}, matching app/build.gradle versionName.")
     return expected
 
@@ -105,8 +108,26 @@ def collect():
     print(f"Verified and staged {len(lines)} signed APKs.")
 
 
+def publish():
+    ver = version()
+    directory = ROOT / "release-assets"
+    apks = sorted(directory.glob("*.apk"))
+    checksums = directory / "SHA256SUMS"
+    if len(apks) != len(EXPECTED_ABIS) + 1 or not checksums.is_file():
+        raise ValueError("Collect the five verified APKs and checksums before publishing.")
+    command = [
+        "gh", "release", "create", "v" + ver,
+        *(str(path) for path in apks), str(checksums),
+        "--verify-tag", "--title", "MiddleShare v" + ver,
+        "--generate-notes", "--notes-file", str(ROOT / ".github/release-notes.md"),
+    ]
+    if "-" in ver:
+        command.append("--prerelease")
+    subprocess.run(command, check=True, cwd=ROOT)
+
+
 if __name__ == "__main__":
-    commands = {"validate": version, "signing": signing, "collect": collect}
+    commands = {"validate": version, "signing": signing, "collect": collect, "publish": publish}
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=commands)
     args = parser.parse_args()
