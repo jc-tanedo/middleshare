@@ -54,6 +54,14 @@ def older_artifacts(artifacts, active_runs):
     return remove
 
 
+def active_run_ids(repo):
+    return {
+        run["id"]
+        for status in ("in_progress", "queued", "waiting", "pending", "requested")
+        for run in items(f"repos/{repo}/actions/runs?status={status}&per_page=100", "workflow_runs")
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=os.environ.get("GH_REPO"))
@@ -64,11 +72,7 @@ def main(argv=None):
 
     base = f"repos/{args.repo}/actions"
     artifacts = items(f"{base}/artifacts?per_page=100", "artifacts")
-    active_runs = {
-        run["id"]
-        for status in ("in_progress", "queued", "waiting", "pending", "requested")
-        for run in items(f"{base}/runs?status={status}&per_page=100", "workflow_runs")
-    }
+    active_runs = active_run_ids(args.repo)
     candidates = older_artifacts(artifacts, active_runs)
     statuses = {}
     deleted_bytes = 0

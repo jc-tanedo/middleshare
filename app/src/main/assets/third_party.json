@@ -57,7 +57,7 @@
     "Robolectric": "4.14.1"
   },
   "registryHashes": {
-    "third_party/additional-components.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "third_party/additional-components.json": "c34b320baecffa40648052cd603b171481f9d141e7e39d9624fbb72ea5cdc302",
     "third_party/license-sources.json": "fd4e1e52dde3c1d669b9574481e809c2a63461f746e325bb939e96c64efecd2d",
     "third_party/native-components.json": "77b998c6f79423751ea5abcbd18e52af1a451089a80db89cefff9d8570a9edb4",
     "scripts/update_credits.py": "20106c7f221269478e7b8687f13f1fc8417c250dda0726d07a8b25f3c4553dea"
@@ -83,6 +83,7 @@
     "licenses/WTFPL.txt": "13d8825a59e5e546d41e8711405d0f335a9934362a47c04a3b4280fa7932dc4a",
     "licenses/Zlib.txt": "bfb1112d49db5b1daecdfef24bd7e2f3ea0bafb33aa67aa0ab51e2bf8407c03d",
     "licenses/bzip2-1.0.6.txt": "0a56dbabe7d2ff65dea26e8b795fe42c6204a192b974d8e9304fe356ccda9fd1",
+    "licenses/ci-s3-sdk.txt": "921a54b58b19d880c64abc76d1ab7656bdc9593483d1aa08ecf1cc884bd7dcb4",
     "licenses/ejs-third-party-notices.txt": "af3fb5c4a9d3c83bc77fb566bb26caeea5ba67a19adc9837063401bed8c93373",
     "licenses/libass-notices.txt": "f7e30699d02798351e7f839e3d3bfeb29ce65e44efa7735c225464c4fd7dfe9c",
     "licenses/libtheora-notices.txt": "8417fad7da775735564e209484a2e011e0fa201e94f01fdbee6e4977e478e6fc",
@@ -104,7 +105,8 @@
     "licenses/vmaf-notices.txt": "a6fdb51d02b9dfe198e55534bb8047fe6d756eda117f4ff83de98f92c1952710"
   },
   "vendoredFiles": {
-    "app/src/video/res/raw/ytdlp": "b7af77f686e95f7845ce8d09d21957718febb8b48b30555adb9dd2292ad7bf14"
+    "app/src/video/res/raw/ytdlp": "b7af77f686e95f7845ce8d09d21957718febb8b48b30555adb9dd2292ad7bf14",
+    "scripts/s3-sdk-lock.json": "571bb1086abd7fdae0c35841b0a533d9bd4323d4be677b4a3e921d951a7fb739"
   },
   "components": [
     {
@@ -120,6 +122,67 @@
       ]
     },
     {
+      "id": "tool:ci-s3:boto3",
+      "name": "boto3 (CI artifacts)",
+      "version": "1.43.119",
+      "category": "Build and test tools",
+      "license": "Apache-2.0",
+      "source": "https://github.com/boto/boto3",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:botocore",
+      "name": "botocore (CI artifacts)",
+      "version": "1.43.119",
+      "category": "Build and test tools",
+      "license": "Apache-2.0",
+      "source": "https://github.com/boto/botocore",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:ca-certificates",
+      "name": "Botocore CA root certificates (CI artifacts)",
+      "version": "Bundled with botocore 1.43.119",
+      "category": "Build and test tools",
+      "license": "MPL-2.0",
+      "source": "https://github.com/boto/botocore",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt",
+        "licenses/MPL-2.0.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:vendored-six",
+      "name": "Botocore vendored six (CI artifacts)",
+      "version": "1.16.0",
+      "category": "Build and test tools",
+      "license": "MIT",
+      "source": "https://github.com/boto/botocore",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
       "id": "tool:Gradle",
       "name": "Gradle",
       "version": "8.11.1",
@@ -129,6 +192,21 @@
       "licenseUrls": [],
       "noticeAssets": [
         "licenses/Apache-2.0.txt"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:jmespath",
+      "name": "jmespath (CI artifacts)",
+      "version": "1.1.0",
+      "category": "Build and test tools",
+      "license": "MIT",
+      "source": "https://github.com/jmespath/jmespath.py",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
       ]
     },
     {
@@ -144,6 +222,36 @@
       ]
     },
     {
+      "id": "tool:ci-s3:python-dateutil",
+      "name": "python-dateutil (CI artifacts)",
+      "version": "2.9.0.post0",
+      "category": "Build and test tools",
+      "license": "Apache-2.0 AND BSD-3-Clause",
+      "source": "https://github.com/dateutil/dateutil",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:requests-compat",
+      "name": "Requests compatibility code (CI artifacts)",
+      "version": "Bundled with botocore 1.43.119",
+      "category": "Build and test tools",
+      "license": "Apache-2.0",
+      "source": "https://github.com/boto/botocore",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
       "id": "tool:Robolectric",
       "name": "Robolectric",
       "version": "4.14.1",
@@ -153,6 +261,66 @@
       "licenseUrls": [],
       "noticeAssets": [
         "licenses/MIT.txt"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:s3transfer",
+      "name": "s3transfer (CI artifacts)",
+      "version": "0.19.3",
+      "category": "Build and test tools",
+      "license": "Apache-2.0",
+      "source": "https://github.com/boto/s3transfer",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:six",
+      "name": "six (CI artifacts)",
+      "version": "1.17.0",
+      "category": "Build and test tools",
+      "license": "MIT",
+      "source": "https://github.com/benjaminp/six",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:urllib3",
+      "name": "urllib3 (CI artifacts)",
+      "version": "2.8.0",
+      "category": "Build and test tools",
+      "license": "MIT",
+      "source": "https://github.com/urllib3/urllib3",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
+      ]
+    },
+    {
+      "id": "tool:ci-s3:urllib3-compat",
+      "name": "urllib3 compatibility code (CI artifacts)",
+      "version": "Bundled with botocore 1.43.119",
+      "category": "Build and test tools",
+      "license": "MIT",
+      "source": "https://github.com/boto/botocore",
+      "licenseUrls": [],
+      "noticeAssets": [
+        "licenses/ci-s3-sdk.txt"
+      ],
+      "files": [
+        "scripts/s3-sdk-lock.json"
       ]
     },
     {

@@ -78,7 +78,8 @@ final class VideoAddon {
                 .setMessage(
                         BuildConfig.DEBUG
                                 ? "Install MiddleShare Video Debug from the same Actions build as"
-                                        + " this main app, using the APK for your device (usually"
+                                        + " this main app. Use the download links in that run's"
+                                        + " summary and choose the APK for your device (usually"
                                         + " arm64-v8a). Then return and tap Try again. A release"
                                         + " add-on cannot pair with this debug installation."
                                 : "Install the optional MiddleShare Video APK from the latest"

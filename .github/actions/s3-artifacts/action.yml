@@ -1,0 +1,46 @@
+name: Private S3 artifacts
+description: Upload artifacts or maintain their scoped SeaweedFS storage using a pinned CI-only SDK.
+inputs:
+  command:
+    description: upload, prune, links, or probe
+    default: upload
+  artifacts:
+    description: Space-separated artifact types for uploads.
+    default: ''
+  endpoint:
+    default: https://bucket.s3.jczr.dev
+    description: HTTPS S3 gateway endpoint.
+  bucket:
+    default: gh-artifact-store
+    description: Private artifact bucket.
+  region:
+    default: us-east-1
+    description: S3 signing region.
+  addressing-style:
+    default: path
+    description: S3 path or virtual-hosted bucket addressing.
+  expiry:
+    default: '86400'
+    description: Presigned download link lifetime in seconds.
+runs:
+  using: composite
+  steps:
+    - name: Prepare the cached CI-only S3 SDK
+      id: sdk
+      shell: bash
+      run: python3 scripts/setup_s3_sdk.py
+    - name: Process private artifact storage
+      shell: bash
+      env:
+        S3_COMMAND: ${{ inputs.command }}
+        S3_ARTIFACTS: ${{ inputs.artifacts }}
+        S3_ENDPOINT: ${{ inputs.endpoint }}
+        S3_BUCKET: ${{ inputs.bucket }}
+        S3_REGION: ${{ inputs.region }}
+        S3_ADDRESSING_STYLE: ${{ inputs.addressing-style }}
+        S3_LINK_EXPIRY: ${{ inputs.expiry }}
+        S3_SDK_PATH: ${{ steps.sdk.outputs.site_packages }}
+      run: |
+        export PYTHONPATH="$S3_SDK_PATH${PYTHONPATH:+:$PYTHONPATH}"
+        read -r -a artifacts <<< "$S3_ARTIFACTS"
+        python3 scripts/s3_artifacts.py "$S3_COMMAND" "${artifacts[@]}"

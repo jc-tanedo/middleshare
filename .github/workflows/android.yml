@@ -29,16 +29,14 @@ jobs:
         env:
           ANDROID_DEBUG_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_DEBUG_KEYSTORE_PASSWORD }}
         run: ./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease verifyVideoReleaseZipHandlers
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - name: Upload private APK artifacts
+        if: github.actor != 'dependabot[bot]' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: ./.github/actions/s3-artifacts
+        env:
+          S3_ACCESS_KEY_ID: ${{ vars.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
         with:
-          name: middleshare-core-debug
-          path: app/build/outputs/apk/core/debug/*universal*.apk
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: middleshare-video-debug
-          path: app/build/outputs/apk/video/debug/*.apk
-          if-no-files-found: error
+          artifacts: middleshare-core-debug middleshare-video-debug
       - name: Remove debug signing key
         if: always()
         run: rm -f "$RUNNER_TEMP/middleshare-debug.jks"

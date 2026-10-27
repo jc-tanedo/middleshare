@@ -1,1 +1,168 @@
-[]
+[
+  {
+    "id": "tool:ci-s3:boto3",
+    "name": "boto3 (CI artifacts)",
+    "version": "1.43.119",
+    "category": "Build and test tools",
+    "license": "Apache-2.0",
+    "source": "https://github.com/boto/boto3",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:botocore",
+    "name": "botocore (CI artifacts)",
+    "version": "1.43.119",
+    "category": "Build and test tools",
+    "license": "Apache-2.0",
+    "source": "https://github.com/boto/botocore",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:jmespath",
+    "name": "jmespath (CI artifacts)",
+    "version": "1.1.0",
+    "category": "Build and test tools",
+    "license": "MIT",
+    "source": "https://github.com/jmespath/jmespath.py",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:python-dateutil",
+    "name": "python-dateutil (CI artifacts)",
+    "version": "2.9.0.post0",
+    "category": "Build and test tools",
+    "license": "Apache-2.0 AND BSD-3-Clause",
+    "source": "https://github.com/dateutil/dateutil",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:s3transfer",
+    "name": "s3transfer (CI artifacts)",
+    "version": "0.19.3",
+    "category": "Build and test tools",
+    "license": "Apache-2.0",
+    "source": "https://github.com/boto/s3transfer",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:six",
+    "name": "six (CI artifacts)",
+    "version": "1.17.0",
+    "category": "Build and test tools",
+    "license": "MIT",
+    "source": "https://github.com/benjaminp/six",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:urllib3",
+    "name": "urllib3 (CI artifacts)",
+    "version": "2.8.0",
+    "category": "Build and test tools",
+    "license": "MIT",
+    "source": "https://github.com/urllib3/urllib3",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:requests-compat",
+    "name": "Requests compatibility code (CI artifacts)",
+    "version": "Bundled with botocore 1.43.119",
+    "category": "Build and test tools",
+    "license": "Apache-2.0",
+    "source": "https://github.com/boto/botocore",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:urllib3-compat",
+    "name": "urllib3 compatibility code (CI artifacts)",
+    "version": "Bundled with botocore 1.43.119",
+    "category": "Build and test tools",
+    "license": "MIT",
+    "source": "https://github.com/boto/botocore",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:vendored-six",
+    "name": "Botocore vendored six (CI artifacts)",
+    "version": "1.16.0",
+    "category": "Build and test tools",
+    "license": "MIT",
+    "source": "https://github.com/boto/botocore",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  },
+  {
+    "id": "tool:ci-s3:ca-certificates",
+    "name": "Botocore CA root certificates (CI artifacts)",
+    "version": "Bundled with botocore 1.43.119",
+    "category": "Build and test tools",
+    "license": "MPL-2.0",
+    "source": "https://github.com/boto/botocore",
+    "licenseUrls": [],
+    "noticeAssets": [
+      "licenses/ci-s3-sdk.txt",
+      "licenses/MPL-2.0.txt"
+    ],
+    "files": [
+      "scripts/s3-sdk-lock.json"
+    ]
+  }
+]

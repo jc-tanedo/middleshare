@@ -1,10 +1,20 @@
 # Releasing MiddleShare
 
-Version tags such as `v0.8.5` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, checks ZIP handler constructors in the optimized video APK, verifies signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
+Version tags such as `v0.8.5` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, checks ZIP handler constructors in the optimized video APK, verifies signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary trusted builds upload debug APKs to private SeaweedFS storage, with download links in the workflow summary.
 
-The **Artifact retention** workflow keeps the two newest completed versions of each Actions artifact type: core debug, video debug, and release archives. It runs after Android/Release workflows finish and can be run manually. Older combined `middleshare-debug` artifacts count toward the core history. Active runs and unrelated artifact names are protected. This cleanup never deletes published GitHub Release assets; GitHub's repository-wide artifact expiration limit still applies.
+The **Artifact retention** workflow keeps the two newest completed versions of each private artifact type: core debug, video debug, and release archives. It runs after Android/Release workflows finish and can be run manually. Active builds and other bucket contents are protected. Incomplete objects and multipart uploads from completed runs are removed. Existing GitHub Actions artifacts retain their previous two-version cleanup policy; new uploads no longer use GitHub's artifact quota. Published GitHub Release assets are never deleted by either cleanup.
 
-The release job's duplicate Actions archive is optional: hitting the Actions storage quota does not bypass validation or block the required direct upload to GitHub Releases. Debug artifact uploads still fail if storage is full. GitHub can take 6–12 hours to recalculate usage after cleanup.
+The release job's private S3 archive is optional: a storage outage does not bypass validation or block the required direct upload to GitHub Releases.
+
+## Private CI artifact storage
+
+The shared `.github/actions/s3-artifacts` action defaults to endpoint `https://bucket.s3.jczr.dev`, bucket `gh-artifact-store`, region `us-east-1`, and path-style S3 requests. Artifacts live only under `ci-artifacts/OWNER/REPO/TYPE/RUN/ATTEMPT/`. Change the common action inputs to change these settings.
+
+Configure repository **variable** `S3_ACCESS_KEY_ID` and repository **secret** `S3_SECRET_ACCESS_KEY`. The key ID must not also remain a secret: GitHub would redact it inside presigned URLs and break the links. The secret key is never included in links or logs. The storage identity needs listing, read, write, delete, and multipart permissions within the repository's artifact prefix. TLS verification stays enabled; the uploader does not make the bucket public.
+
+Each run summary contains individual APK downloads and a manifest with SHA-256 checksums. Links expire after 24 hours and can stop working earlier if their build is pruned. To renew them without rebuilding, open **Actions → Artifact retention → Run workflow → download-links**. Choose **test-storage** to test listing, a 9 MiB multipart upload, presigned download/checksum, anonymous-access denial, and deletion of the test object. The default **cleanup** operation keeps the newest two complete builds of each type.
+
+The uploader requires Python 3.10+. Its hash-pinned, pure-Python Boto3 SDK is cached in the runner's tool cache without pip, sudo, or system Python changes. These dependencies and their bundled notices appear in About as development-only tools; their code is not included in either APK. Fork/Dependabot pull requests still run build checks but do not receive storage credentials or upload private artifacts.
 
 ## One-time signing setup
 

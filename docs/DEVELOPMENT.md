@@ -26,7 +26,7 @@ All jobs use `self-hosted` runners. Configure an Ubuntu/Debian runner with Bash 
 
 Android and release jobs also reuse an existing full JDK 17 or 21, or install Temurin 17 if needed. They reuse a complete Android SDK with platform 35, build-tools 35.0.0, platform-tools, and accepted SDK licenses. Otherwise, the pinned Android setup action installs the required packages and accepts SDK licenses, bootstrapping with command-line tools 16.0 (12266719). `ANDROID_HOME`/`ANDROID_SDK_ROOT` are kept consistent; the default SDK directory is the runner user's `~/.android/sdk`, which is also used if an incomplete configured SDK directory is not writable. Keep tool directories outside the checkout so subsequent jobs can reuse them. The Gradle wrapper downloads and verifies Gradle 8.11.1 when it is not cached.
 
-Artifact retention jobs prepare only the command-line tools and skip Java/Android setup. Workflow tokens supply GitHub CLI authentication; no interactive `gh auth login` is needed.
+Artifact retention jobs prepare only the command-line tools and skip Java/Android setup. Workflow tokens supply GitHub CLI authentication; no interactive `gh auth login` is needed. Private artifact uploads also bootstrap a cached, hash-pinned Python S3 SDK without pip or sudo; see [private CI artifact storage](../RELEASING.md#private-ci-artifact-storage).
 
 ## Code conventions and review
 
