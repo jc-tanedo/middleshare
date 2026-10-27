@@ -2,7 +2,9 @@
 
 Version tags such as `v0.8.5` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, checks ZIP handler constructors in the optimized video APK, verifies signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
 
-New Actions artifacts expire after seven days. The release job's duplicate Actions archive is optional: hitting the Actions storage quota does not bypass validation or block the required direct upload to GitHub Releases. Debug artifact uploads still fail if storage is full; existing artifacts retain their original expiration dates.
+The **Artifact retention** workflow keeps the two newest completed versions of each Actions artifact type: core debug, video debug, and release archives. It runs after Android/Release workflows finish and can be run manually. Older combined `middleshare-debug` artifacts count toward the core history. Active runs and unrelated artifact names are protected. This cleanup never deletes published GitHub Release assets; GitHub's repository-wide artifact expiration limit still applies.
+
+The release job's duplicate Actions archive is optional: hitting the Actions storage quota does not bypass validation or block the required direct upload to GitHub Releases. Debug artifact uploads still fail if storage is full. GitHub can take 6–12 hours to recalculate usage after cleanup.
 
 ## One-time signing setup
 

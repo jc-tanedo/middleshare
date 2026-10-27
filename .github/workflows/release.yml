@@ -57,7 +57,6 @@ jobs:
           name: release-apks
           path: release-assets/*
           if-no-files-found: error
-          retention-days: 7
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

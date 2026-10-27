@@ -37,13 +37,11 @@ jobs:
           name: middleshare-core-debug
           path: app/build/outputs/apk/core/debug/*universal*.apk
           if-no-files-found: error
-          retention-days: 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: middleshare-video-debug
           path: app/build/outputs/apk/video/debug/*.apk
           if-no-files-found: error
-          retention-days: 7
       - name: Remove debug signing key
         if: always()
         run: rm -f "$RUNNER_TEMP/middleshare-debug.jks"
