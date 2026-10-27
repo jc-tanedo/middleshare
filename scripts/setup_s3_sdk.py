@@ -75,7 +75,13 @@ def install():
 
 
 if __name__ == "__main__":
-    path = install()
+    try:
+        path = install()
+    except Exception as error:
+        # Installer requests carry no credentials; still avoid dumping response bodies.
+        message = f"CI S3 SDK setup failed ({type(error).__name__}); Python {sys.version_info.major}.{sys.version_info.minor}, requires 3.10+. Check cache permissions and access to files.pythonhosted.org."
+        print(f"::error::{message}", file=sys.stderr)
+        raise SystemExit(1) from None
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
             output.write(f"site_packages={path}\n")
