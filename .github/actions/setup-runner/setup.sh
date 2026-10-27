@@ -3,14 +3,65 @@ set -euo pipefail
 
 ANDROID_API=35
 ANDROID_BUILD_TOOLS=35.0.0
+MIDDLESHARE_RUNNER_TOOLS_DIR=${MIDDLESHARE_RUNNER_TOOLS_DIR:-"$HOME/.local/share/middleshare-runner"}
+
+enable_archive_tools() {
+    local directory="$MIDDLESHARE_RUNNER_TOOLS_DIR/usr/bin"
+    if [[ -d "$directory" ]]; then
+        export PATH="$directory:$PATH"
+        printf '%s\n' "$directory" >> "$GITHUB_PATH"
+    fi
+}
+
+install_archive_tools() (
+    local prefix="$MIDDLESHARE_RUNNER_TOOLS_DIR" download_dir package
+    local options=(
+        -c "$prefix/apt/user.conf"
+        -o "Dir::State::lists=$prefix/apt/lists"
+        -o "Dir::Cache=$prefix/apt/cache"
+        -o "APT::Sandbox::User=$(id -un)"
+    )
+    mkdir -p "$prefix/apt/lists/partial" "$prefix/apt/cache/archives/partial"
+    # System apt hooks can write root-owned caches even for a private apt update.
+    printf '%s\n' '#clear APT::Update::Pre-Invoke;' '#clear APT::Update::Post-Invoke;' \
+        '#clear APT::Update::Post-Invoke-Success;' > "$prefix/apt/user.conf"
+    # A private apt index/cache avoids changing the system package database.
+    # apt still verifies repository signatures with the configured distro keys.
+    apt-get "${options[@]}" update
+    download_dir=$(mktemp -d "${RUNNER_TEMP:-/tmp}/middleshare-archives.XXXXXX")
+    trap 'rm -rf "$download_dir"' EXIT
+    cd "$download_dir"
+    apt-get "${options[@]}" download "$@"
+    for package in ./*.deb; do
+        dpkg-deb --extract "$package" "$prefix"
+    done
+    for package in "$@"; do
+        "$prefix/usr/bin/$package" -v >/dev/null
+    done
+)
+
+can_install_system_packages() {
+    (( EUID == 0 )) || { command -v sudo >/dev/null && sudo -n true; }
+}
 
 install_packages() {
-    local elevated=()
-    if (( EUID != 0 )); then
-        if ! command -v sudo >/dev/null || ! sudo -n true; then
-            echo "::error::Missing packages: $*. Run the runner as root or enable passwordless sudo for dependency installation."
-            return 1
+    local elevated=() package archives_only=true
+    if ! can_install_system_packages; then
+        for package in "$@"; do
+            if [[ "$package" != zip && "$package" != unzip ]]; then
+                archives_only=false
+            fi
+        done
+        if [[ "$archives_only" == true ]]; then
+            echo 'Installing archive tools in the runner user directory.'
+            install_archive_tools "$@"
+            enable_archive_tools
+            return
         fi
+        echo "::error::Missing packages: $*. Run the runner as root or enable passwordless sudo for dependency installation."
+        return 1
+    fi
+    if (( EUID != 0 )); then
         elevated=(sudo -n)
     fi
     "${elevated[@]}" apt-get -o DPkg::Lock::Timeout=120 update
@@ -99,6 +150,7 @@ main() {
         echo '::error::The dependency setup requires an Ubuntu/Debian Linux runner.'
         return 1
     fi
+    enable_archive_tools
     ensure_tools
     if [[ ${SETUP_ANDROID:-false} == true ]]; then
         prepare_android

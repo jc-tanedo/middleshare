@@ -24,4 +24,6 @@ runs:
       if: inputs.android == 'true' && steps.tools.outputs.sdk_ready != 'true'
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
+        # Keep the SDK bootstrap compatible with both supported JDKs.
+        cmdline-tools-version: '12266719' # 16.0
         packages: ${{ steps.tools.outputs.android_packages }}

@@ -19,6 +19,61 @@ def bash(code, env=None):
 
 
 class RunnerSetupTests(unittest.TestCase):
+    def test_user_local_install_uses_private_apt_state_and_exports_the_tools(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            env = dict(
+                os.environ,
+                MIDDLESHARE_RUNNER_TOOLS_DIR=str(root / "tools"),
+                GITHUB_PATH=str(root / "paths"),
+                APT_LOG=str(root / "apt.log"),
+            )
+            result = bash("""
+apt-get() {
+    printf '%s\n' "$*" >> "$APT_LOG"
+    for arg in "$@"; do
+        if [[ "$arg" == download ]]; then touch fixture.deb; fi
+    done
+}
+dpkg-deb() {
+    mkdir -p "$3/usr/bin"
+    printf '#!/bin/sh\nexit 0\n' > "$3/usr/bin/zip"
+    cp "$3/usr/bin/zip" "$3/usr/bin/unzip"
+    chmod +x "$3/usr/bin/zip" "$3/usr/bin/unzip"
+}
+install_archive_tools zip unzip
+enable_archive_tools
+command -v unzip
+""", env)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn(str(root / "tools/usr/bin/unzip"), result.stdout)
+            self.assertIn(str(root / "tools/usr/bin"), (root / "paths").read_text())
+            self.assertIn(" download zip unzip", (root / "apt.log").read_text())
+            self.assertIn(
+                "#clear APT::Update::Post-Invoke;",
+                (root / "tools/apt/user.conf").read_text(),
+            )
+
+    def test_unprivileged_archive_packages_use_the_local_fallback(self):
+        result = bash("""
+can_install_system_packages() { return 1; }
+install_archive_tools() { printf 'LOCAL:%s\n' "$@"; }
+enable_archive_tools() { :; }
+install_packages zip unzip
+""")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("LOCAL:zip", result.stdout)
+        self.assertIn("LOCAL:unzip", result.stdout)
+
+    def test_other_os_packages_are_not_extracted_as_portable_tools(self):
+        result = bash("""
+can_install_system_packages() { return 1; }
+install_archive_tools() { echo 'Unexpected extraction'; }
+install_packages python3
+""")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("Unexpected extraction", result.stdout)
+
     def test_existing_base_tools_do_not_invoke_apt(self):
         result = bash("""
 command() { return 0; }
