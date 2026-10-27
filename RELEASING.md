@@ -1,6 +1,6 @@
 # Releasing MiddleShare
 
-Version tags such as `v0.8.4` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, verifies their signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
+Version tags such as `v0.8.5` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, checks ZIP handler constructors in the optimized video APK, verifies signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
 
 ## One-time signing setup
 
@@ -28,8 +28,8 @@ The workflow refuses to publish without these secrets. It uses the job's built-i
 2. Tag that commit with the exact matching version (stable `vMAJOR.MINOR.PATCH` tags are supported):
 
    ```sh
-   git tag -a v0.8.4 -m "MiddleShare 0.8.4"
-   git push origin v0.8.4
+   git tag -a v0.8.5 -m "MiddleShare 0.8.5"
+   git push origin v0.8.5
    ```
 
 3. Wait for **Actions → Release**. The published release includes the small main APK, four video add-on APKs (three ABIs plus universal), checksums, install instructions, and GitHub's source archives. The app links to `https://github.com/jc-tanedo/middleshare/releases/latest`.
@@ -62,7 +62,7 @@ For local builds, set `ANDROID_DEBUG_KEYSTORE_PATH` and `ANDROID_DEBUG_KEYSTORE_
 
 ## Local signed build
 
-Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`, then run `./gradlew assembleCoreRelease assembleVideoRelease`. Without signing variables, local release builds remain unsigned. Do not publish unsigned APKs. `RELEASE_TAG=v0.8.4 python3 scripts/release.py collect` verifies and stages signed APKs under ignored `release-assets/` when the Android SDK is configured.
+Set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`, then run `./gradlew assembleCoreRelease assembleVideoRelease verifyVideoReleaseZipHandlers`. Without signing variables, local release builds remain unsigned. Do not publish unsigned APKs. `RELEASE_TAG=v0.8.5 python3 scripts/release.py collect` verifies and stages signed APKs under ignored `release-assets/` when the Android SDK is configured.
 
 ## Device checks before tagging
 

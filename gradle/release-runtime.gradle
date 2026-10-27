@@ -1,0 +1,26 @@
+import groovy.json.JsonSlurper
+
+tasks.register('verifyVideoReleaseZipHandlers') {
+    group = 'verification'
+    description = 'Checks reflective ZIP handlers in the actual optimized video APK.'
+    dependsOn 'assembleVideoRelease'
+    doLast {
+        def metadataFile = layout.buildDirectory.file('outputs/apk/video/release/output-metadata.json').get().asFile
+        def metadata = new JsonSlurper().parse(metadataFile)
+        def universal = metadata.elements.find { it.filters.isEmpty() }
+        if (!universal) throw new GradleException('The video release universal APK is missing.')
+        def compress = configurations.videoReleaseRuntimeClasspath.incoming.artifacts.artifacts.find {
+            it.id.componentIdentifier instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier &&
+                it.id.componentIdentifier.group == 'org.apache.commons' &&
+                it.id.componentIdentifier.module == 'commons-compress'
+        }
+        if (!compress) throw new GradleException('The Commons Compress runtime artifact is missing.')
+        exec {
+            commandLine 'python3', rootProject.file('scripts/verify_release_zip_handlers.py'),
+                '--apk', new File(metadataFile.parentFile, universal.outputFile),
+                '--mapping', layout.buildDirectory.file('outputs/mapping/videoRelease/mapping.txt').get().asFile,
+                '--compress-jar', compress.file,
+                '--dexdump', new File(android.sdkDirectory, "build-tools/${android.buildToolsVersion}/dexdump")
+        }
+    }
+}

@@ -22,6 +22,9 @@ final class VideoDownloader {
     static final long MAX_VIDEO_BYTES = 256L * 1024 * 1024;
     static final long MAX_WORK_BYTES = 3 * MAX_VIDEO_BYTES;
     static final long MAX_DURATION_MS = 10 * 60 * 1000L;
+    private static final String RUNTIME_FAILURE =
+            "Video tools could not run. Reinstall the matching MiddleShare Video APK for your"
+                    + " device, then try again.";
 
     interface Progress {
         void update(String message);
@@ -185,6 +188,9 @@ final class VideoDownloader {
             return output;
         } catch (IOException e) {
             throw e;
+        } catch (LinkageError e) {
+            checkCancelled();
+            throw new IOException(RUNTIME_FAILURE, e);
         } catch (Exception e) {
             if (cancelled.get() || Thread.currentThread().isInterrupted())
                 throw new InterruptedIOException("Download cancelled.");
@@ -235,6 +241,9 @@ final class VideoDownloader {
             return VideoFormat.parse(json);
         } catch (IOException e) {
             throw e;
+        } catch (LinkageError e) {
+            checkCancelled();
+            throw new IOException(RUNTIME_FAILURE, e);
         } catch (Exception e) {
             checkCancelled();
             throw new IOException(
@@ -249,7 +258,7 @@ final class VideoDownloader {
     private void stop(String id) {
         try {
             engine.cancel(id);
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException | LinkageError ignored) {
             /* Retry on the next monitor tick. */
         }
     }

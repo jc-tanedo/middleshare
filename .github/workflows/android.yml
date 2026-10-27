@@ -31,7 +31,7 @@ jobs:
       - name: Test and build APKs
         env:
           ANDROID_DEBUG_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_DEBUG_KEYSTORE_PASSWORD }}
-        run: ./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
+        run: ./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease verifyVideoReleaseZipHandlers
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: middleshare-core-debug

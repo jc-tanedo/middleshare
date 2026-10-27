@@ -178,7 +178,9 @@ public class VideoDownloaderTest {
                                 fail("Cancelled job started a download");
                             }
 
-                            public void cancel(String id) {}
+                            public void cancel(String id) {
+                                throw new UnsatisfiedLinkError("Runtime unavailable");
+                            }
                         });
         downloader.cancel();
         assertThrows(
@@ -246,5 +248,52 @@ public class VideoDownloaderTest {
         assertEquals(
                 0,
                 context.getCacheDir().listFiles((dir, name) -> name.startsWith("video-")).length);
+    }
+
+    @Test
+    public void runtimeLinkageFailuresBecomeErrorsForBothDownloadsAndFormatLookup() {
+        for (boolean failDuringInit : new boolean[] {true, false}) {
+            LinkageError failure = new NoClassDefFoundError("Missing runtime class");
+            VideoDownloader downloader =
+                    new VideoDownloader(
+                            new VideoDownloader.Engine() {
+                                public void init(Context app) {
+                                    if (failDuringInit) throw failure;
+                                }
+
+                                public void execute(
+                                        YoutubeDLRequest request,
+                                        String id,
+                                        VideoDownloader.Progress progress) {
+                                    throw failure;
+                                }
+
+                                public String inspect(YoutubeDLRequest request, String id) {
+                                    throw failure;
+                                }
+
+                                public void cancel(String id) {
+                                    throw failure;
+                                }
+                            });
+            IOException download =
+                    assertThrows(
+                            IOException.class,
+                            () ->
+                                    downloader.download(
+                                            context, "https://example.com/v", message -> {}));
+            IOException lookup =
+                    assertThrows(
+                            IOException.class,
+                            () -> downloader.formats(context, "https://example.com/v"));
+            assertSame(failure, download.getCause());
+            assertSame(failure, lookup.getCause());
+            assertTrue(download.getMessage().contains("Video tools could not run"));
+            assertEquals(
+                    0,
+                    context.getCacheDir()
+                            .listFiles((dir, name) -> name.startsWith("video-"))
+                            .length);
+        }
     }
 }

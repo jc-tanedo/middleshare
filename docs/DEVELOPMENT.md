@@ -6,7 +6,7 @@ Use Android Studio or a full JDK 17/21, Android SDK platform 35, build-tools 35.
 
 ```sh
 python3 -m unittest discover -s tests
-./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
+./gradlew testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease verifyVideoReleaseZipHandlers
 adb install -r app/build/outputs/apk/core/debug/app-core-universal-debug.apk
 # Optional; both debug APKs must come from the same build:
 adb install -r app/build/outputs/apk/video/debug/app-video-arm64-v8a-debug.apk
@@ -17,6 +17,8 @@ The Gradle wrapper pins and verifies Gradle 8.11.1. Release `core` uses `dev.mid
 The image/UI implementation remains Java with framework views and native image codecs. Only the video flavor adds the youtubedl-android and FFmpeg libraries. The core dependency graph contains no third-party runtime libraries. ABI-specific add-on packages reduce download size. The bundled extractor is SHA-256 checked before use, including when replacing an older extracted copy. TLS verification remains enabled.
 
 Tests cover add-on signature/version checks, missing-add-on prompts and retry, native image codecs on Android 14, Android 15 intent handling, device/default/override themes, link parsing, output MIME/URI permissions, download request policy, cancellation, partial cleanup, size limits, storage preflight, and bundled extractor integrity. The downloader engine and Android storage service are replaced with fixtures in JVM tests; these tests do not establish that live sites or Android native subprocesses work. Use the emulator/device smoke test for integration checks.
+
+Both CI workflows also run `verifyVideoReleaseZipHandlers`. It reads the reflective ZIP handler registry from the resolved Commons Compress JAR, then checks the actual optimized release DEX using the R8 mapping and SDK `dexdump`. Every registered handler must remain concrete with a public no-arg constructor. Keep the targeted rules in `app/proguard-rules.pro`: debug unit tests alone cannot detect constructors removed by release shrinking. This check covers ZIP handler reflection, not full native runtime or live-site behavior.
 
 ## Code conventions and review
 
@@ -40,7 +42,7 @@ The small single-module project uses Android source sets to keep the video runti
 
 The exported `ShareActivity` accepts incoming shares but cannot treat extras as proof of user confirmation. `VideoDownloadActivity`, declared `exported=false`, starts ordinary confirmed video downloads. The explicit favorite shortcut uses the locally saved app and delegates through `FavoriteVideoActivity`, which requires the main app's signature permission. New handoff changes must preserve this boundary and the add-on package/version/signature checks.
 
-The video progress drawer can open Android's activity picker with a MIME-only share intent. `ShareDestinations` validates the returned component against exported, enabled video receivers and rechecks the finished MIME type before dispatch. Selection lives in activity state, not incoming share extras or saved preferences. Completed jobs defer dispatch while the picker is open or the activity is paused. `ConversionJob` supports independent observers so closing a drawer detaches only that UI. `VideoTransfers` owns application-context-only jobs and atomic metadata; `VideoDownloadService` owns the foreground notification and wake lock. Ready notifications point directly to a private activity via immutable PendingIntents, avoiding notification trampolines. Completed descriptors survive process loss; running records recover as interrupted rather than silently restarting native processes.
+The video progress drawer stays open by default and can be minimized while the download continues. Ready notifications open Android's native share sheet; only the explicit favorite shortcut keeps a configured destination. `ShareDestinations` rechecks that favorite against exported, enabled receivers and the finished MIME type before dispatch. `ConversionJob` supports independent observers so closing a drawer detaches only that UI. `VideoTransfers` owns application-context-only jobs and atomic metadata; `VideoDownloadService` owns the foreground notification and wake lock. Ready notifications point directly to a private activity via immutable PendingIntents, avoiding notification trampolines. Completed descriptors survive process loss; running records recover as interrupted rather than silently restarting native processes.
 
 ## Formatting
 
@@ -62,7 +64,7 @@ Use the existing `/workspace/middleshare` checkout. Tasks are already isolated; 
 ```sh
 source /workspace/tools/middleshare-env.sh
 cd /workspace/middleshare
-./gradlew -I /workspace/tools/android-test.init.gradle testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease
+./gradlew -I /workspace/tools/android-test.init.gradle testCoreDebugUnitTest testVideoDebugUnitTest lintCoreDebug lintVideoDebug assembleCoreDebug assembleVideoDebug assembleCoreRelease assembleVideoRelease verifyVideoReleaseZipHandlers
 ```
 
 The retained SDK, JDK, Gradle cache, proxy, system CA trust, and writable Robolectric cache are configured outside the checkout. No development server is needed. An optional Android 15 x86_64 AVD named `middleshare-api35` is available under `/workspace/android-avd` for native integration checks; it uses software emulation when hardware acceleration is unavailable.
