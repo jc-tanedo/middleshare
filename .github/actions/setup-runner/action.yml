@@ -1,0 +1,27 @@
+name: Set up self-hosted runner dependencies
+description: Install missing Ubuntu/Debian tools and optionally prepare the Android build toolchain.
+inputs:
+  android:
+    description: Prepare a compatible JDK and the required Android SDK packages.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Install missing tools and inspect existing toolchains
+      id: tools
+      shell: bash
+      env:
+        SETUP_ANDROID: ${{ inputs.android }}
+      run: bash "$GITHUB_ACTION_PATH/setup.sh"
+    - name: Install JDK 17 when no compatible JDK is available
+      if: inputs.android == 'true' && steps.tools.outputs.java_ready != 'true'
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      with:
+        distribution: temurin
+        java-version: '17'
+        overwrite-settings: false
+    - name: Install missing Android SDK packages
+      if: inputs.android == 'true' && steps.tools.outputs.sdk_ready != 'true'
+      uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      with:
+        packages: ${{ steps.tools.outputs.android_packages }}

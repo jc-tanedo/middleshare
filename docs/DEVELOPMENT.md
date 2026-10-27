@@ -20,6 +20,14 @@ Tests cover add-on signature/version checks, missing-add-on prompts and retry, n
 
 Both CI workflows also run `verifyVideoReleaseZipHandlers`. It reads the reflective ZIP handler registry from the resolved Commons Compress JAR, then checks the actual optimized release DEX using the R8 mapping and SDK `dexdump`. Every registered handler must remain concrete with a public no-arg constructor. Keep the targeted rules in `app/proguard-rules.pro`: debug unit tests alone cannot detect constructors removed by release shrinking. This check covers ZIP handler reflection, not full native runtime or live-site behavior.
 
+## Self-hosted Actions runners
+
+All jobs use `self-hosted` runners. Configure an Ubuntu/Debian runner with Bash and a working Git checkout. The shared `.github/actions/setup-runner` action checks for Git, Python 3, GitHub CLI, curl, zip/unzip, tar/gzip, and CA certificates. It installs only missing packages through `apt-get`; this requires root or passwordless sudo when installation is necessary. Fully provisioned runners do not invoke apt.
+
+Android and release jobs also reuse an existing full JDK 17 or 21, or install Temurin 17 if needed. They reuse a complete Android SDK with platform 35, build-tools 35.0.0, platform-tools, and accepted SDK licenses. Otherwise, the pinned Android setup action installs the required packages and accepts SDK licenses. `ANDROID_HOME`/`ANDROID_SDK_ROOT` are kept consistent; the default SDK directory is the runner user's `~/.android/sdk`, which is also used if an incomplete configured SDK directory is not writable. Keep tool directories outside the checkout so subsequent jobs can reuse them. The Gradle wrapper downloads and verifies Gradle 8.11.1 when it is not cached.
+
+Artifact retention jobs prepare only the command-line tools and skip Java/Android setup. Workflow tokens supply GitHub CLI authentication; no interactive `gh auth login` is needed.
+
 ## Code conventions and review
 
 Use the existing AOSP Java style and `.editorconfig`. Keep presentation in activity/view classes, receiver discovery in `ShareDestinations`, and persisted preferences in `Settings`. Reuse the shared theme/drawer bases, `Ui` factories, and cache helpers when their behavior matches the caller. Keep different cancellation and security boundaries explicit rather than merging them just because the code looks similar.
