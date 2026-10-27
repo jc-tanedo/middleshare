@@ -13,6 +13,10 @@ runs:
       env:
         SETUP_ANDROID: ${{ inputs.android }}
       run: bash "$GITHUB_ACTION_PATH/setup.sh"
+    - name: Set up cached Python for CI tooling
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+      with:
+        python-version: '3.12'
     - name: Install JDK 17 when no compatible JDK is available
       if: inputs.android == 'true' && steps.tools.outputs.java_ready != 'true'
       uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
