@@ -8,6 +8,6 @@ Install **middleshare-0.8.5.apk** for lightweight, offline image conversion.
 
 For optional video downloads, also install **middleshare-video-0.8.5-arm64-v8a.apk** (most modern phones), **armeabi-v7a** (older 32-bit phones), or **x86_64** (compatible emulators/devices). Choose **universal** if unsure; it is much larger. Keep both apps installed, then share video links to the main MiddleShare app.
 
-Release installations update in place using the existing signing key. Debug builds install separately and require a matching debug video add-on.
+Update **MiddleShare Video** as well as the main app: the crash fix is in the video add-on, and the main app now requires version 0.8.5 or later. Release installations update in place using the existing signing key. Debug builds install separately and require a matching debug video add-on.
 
 SHA256SUMS lists checksums for every APK. Third-party licenses and source links are available in each app's About page. Source archives for this tag appear below.

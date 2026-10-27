@@ -25,7 +25,7 @@ Presets start without a separate format-list lookup. Merely opening settings or 
 
 A Custom default prompts for a new choice on each shared link. Exact format IDs are specific to that link and are never saved in preferences. Results are reused within the share, including across rotation; leaving Custom cancels an unfinished lookup. If loading fails, tap Custom again to retry or use a preset. Resolution caps apply when the source reports dimensions; sources with unknown resolution may pass through. All choices retain the 256 MiB final-file, temporary-storage, and download-time limits below. Full is not an unlimited file-size setting.
 
-Use matching main/add-on APKs from release 0.8.4 or later for foreground downloads and the favorite shortcut. The main app rejects older add-ons.
+Use matching main/add-on APKs from release 0.8.5 or later. The main app rejects older add-ons, including 0.8.4, which can crash while unpacking the video tools. Update MiddleShare Video as well as the main app to receive this fix.
 
 ## Background downloads
 

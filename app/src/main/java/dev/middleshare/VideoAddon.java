@@ -20,7 +20,8 @@ final class VideoAddon {
             BuildConfig.DEBUG
                     ? "https://github.com/jc-tanedo/middleshare/actions/workflows/android.yml"
                     : RELEASES;
-    static final int MIN_VERSION = 14;
+    // Earlier release add-ons can crash while unpacking the native runtime.
+    static final int MIN_VERSION = 15;
     static final String DESTINATION = "dev.middleshare.DESTINATION";
     static final String QUALITY = "dev.middleshare.QUALITY";
     static final String FORMAT = "dev.middleshare.FORMAT";

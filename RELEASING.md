@@ -2,6 +2,8 @@
 
 Version tags such as `v0.8.5` run `.github/workflows/release.yml`. The workflow tests both APK variants, checks lint, builds signed release APKs, checks ZIP handler constructors in the optimized video APK, verifies signatures, writes SHA-256 checksums, and publishes a GitHub Release. Ordinary branch pushes and pull requests upload debug APKs as Actions artifacts only.
 
+New Actions artifacts expire after seven days. The release job's duplicate Actions archive is optional: hitting the Actions storage quota does not bypass validation or block the required direct upload to GitHub Releases. Debug artifact uploads still fail if storage is full; existing artifacts retain their original expiration dates.
+
 ## One-time signing setup
 
 Create and **securely back up** one release signing key. Both the main app and video add-on must always use this key, including future updates. Losing it prevents updates to existing installations. Do not commit the keystore or passwords.

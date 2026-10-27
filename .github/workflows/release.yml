@@ -49,11 +49,15 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: python3 scripts/release.py collect
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - name: Archive release APKs in Actions (optional)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        # Publishing below uploads the same verified files directly to GitHub Releases.
+        continue-on-error: true
         with:
           name: release-apks
           path: release-assets/*
           if-no-files-found: error
+          retention-days: 7
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
